@@ -5,7 +5,7 @@ HERE = os.path.dirname(__file__)
 sys.path.insert(0, HERE)
 import make_voice as mv
 
-recorded = set(mv.norm(p) for p in mv.PHRASES)
+recorded = set(mv.norm(mv.pronounce(p)) for p in mv.PHRASES)
 # de samengestelde lof-zinnen (pick(PRAISE) + suffix) staan al via de loop in PHRASES
 
 def read(name):
@@ -46,7 +46,7 @@ for s in strings:
         continue
     if s in NIET_GESPROKEN or s in mv.PRAISE:   # losse lof-woorden alleen samengesteld gebruikt
         continue
-    if mv.norm(s) not in recorded:
+    if mv.norm(mv.pronounce(s)) not in recorded:
         missing.append(s)
 
 # de losse suffix "  Je hebt alle sterretjes!" zit alleen in samengestelde vorm

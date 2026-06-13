@@ -131,6 +131,18 @@ for p in PRAISE:
 PHRASES.extend(TRY_AGAIN)
 
 
+# Uitspraak-correcties: de stem negeert klemtoontekens, dus sommige woorden
+# worden fonetisch gespeld voor het geluid (de tekst op het scherm blijft gewoon).
+# LET OP: dezelfde lijst staat in js/speech.js.
+PRON = [(re.compile(r"\brokeren\b", re.I), "rokeeren")]
+
+
+def pronounce(s):
+    for rx, rep in PRON:
+        s = rx.sub(rep, s)
+    return s
+
+
 def norm(s):
     return " ".join(s.split()).lower()
 
@@ -143,11 +155,12 @@ def slug(s):
 async def gen_one(outdir, voicecfg, idx, text, manifest):
     fname = f"{idx:03d}-{slug(text)}.mp3"
     path = os.path.join(outdir, fname)
+    spoken = pronounce(text)  # geluid: fonetische spelling; sleutel: norm(spoken)
     for attempt in range(3):
         try:
-            await edge_tts.Communicate(text, voicecfg["voice"], rate=voicecfg["rate"], pitch=voicecfg["pitch"]).save(path)
+            await edge_tts.Communicate(spoken, voicecfg["voice"], rate=voicecfg["rate"], pitch=voicecfg["pitch"]).save(path)
             if os.path.getsize(path) > 500:
-                manifest[norm(text)] = fname
+                manifest[norm(spoken)] = fname
                 return True
         except Exception as e:
             if attempt == 2:

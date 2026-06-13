@@ -61,6 +61,19 @@
   function norm(s) { return String(s).replace(/\s+/g, " ").trim().toLowerCase(); }
   function clampRate(r) { return Math.max(0.6, Math.min(1.6, r)); }
 
+  // Uitspraak-correcties: de stem negeert klemtoontekens, dus sommige woorden
+  // worden fonetisch gespeld voor het geluid. Op het scherm blijft de gewone
+  // spelling staan (de tekstballon gebruikt de originele tekst).
+  // LET OP: dezelfde lijst staat in tools/make_voice.py en tools/check_sync.py.
+  var PRON = [
+    [/\brokeren\b/gi, "rokeeren"]
+  ];
+  function pronounce(s) {
+    var t = String(s);
+    for (var i = 0; i < PRON.length; i++) t = t.replace(PRON[i][0], PRON[i][1]);
+    return t;
+  }
+
   /* ---------- opgenomen stemmen laden ---------- */
   function packDir() { return AUDIO_BASE + state.voicePack + "/"; }
 
@@ -90,7 +103,7 @@
 
   function fileFor(text) {
     if (!state.useRecorded || !state.audioMap || !audioEl) return null;
-    return state.audioMap[norm(text)] || null;
+    return state.audioMap[norm(pronounce(text))] || null;
   }
 
   /* ---------- stemmen kiezen (terugval) ---------- */
@@ -205,9 +218,10 @@
     emit("text", text);
 
     if (!state.enabled) { timedFallback(text, opts, finish); return; }
+    var sayText = pronounce(text); // wat de stem zegt (de ballon toont de originele tekst)
     var file = fileFor(text);
-    if (file) { playRecorded(file, text, myToken, opts, finish); return; }
-    if (synthSupported) { speakSynth(text, myToken, opts, finish); return; }
+    if (file) { playRecorded(file, sayText, myToken, opts, finish); return; }
+    if (synthSupported) { speakSynth(sayText, myToken, opts, finish); return; }
     timedFallback(text, opts, finish);
   }
 
@@ -289,7 +303,8 @@
   function preview(text) {
     if (!state.enabled) return;
     stopPreview();
-    var file = (state.useRecorded && state.audioMap) ? state.audioMap[norm(text)] : null;
+    var sayText = pronounce(text);
+    var file = (state.useRecorded && state.audioMap) ? state.audioMap[norm(sayText)] : null;
     if (file && previewEl) {
       try {
         previewEl.src = packDir() + file;
@@ -302,7 +317,7 @@
     }
     if (synthSupported) {
       try {
-        var u = new SpeechSynthesisUtterance(text);
+        var u = new SpeechSynthesisUtterance(sayText);
         u.lang = (state.voice && state.voice.lang) || "nl-NL";
         if (state.voice) u.voice = state.voice;
         u.rate = Math.max(0.6, Math.min(1.4, state.rate));
