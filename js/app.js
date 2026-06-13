@@ -235,27 +235,33 @@
       b.classList.toggle("is-on", Number(b.dataset.level) === App.settings.difficulty);
     });
   }
+  // simpele, leesbare naam voor een toestel-stem (geen technische codes)
+  function friendlyVoiceName(v) {
+    var n = (v.name || "").replace(/\s*\([^)]*\)\s*/g, " ").replace(/nl[-_]?(NL|BE)/ig, " ").trim();
+    if (/^nl-BE/i.test(v.lang)) n = (n ? n + " " : "") + "(Vlaams)";
+    return n || v.name || "Stem";
+  }
+
   function populateVoices() {
-    var sel = $("set-voice");
+    var sel = $("set-voice"), row = $("voice-row");
     if (!sel) return;
-    var voices = Speech.getVoices();
-    sel.innerHTML = "";
+    // alleen Nederlandse (en Vlaamse) stemmen tonen
+    var voices = (Speech.getVoices() || []).filter(function (v) { return /^nl/i.test(v.lang); });
     if (!voices.length) {
-      var o = document.createElement("option");
-      o.textContent = "Standaardstem van het toestel";
-      o.value = "";
-      sel.appendChild(o);
+      // geen Nederlandse stem op dit toestel: rij verbergen (de mooie stem werkt gewoon)
+      if (row) row.style.display = "none";
+      sel.innerHTML = "";
       return;
     }
-    // Nederlandse stemmen eerst
-    voices.sort(function (a, b) {
-      var na = /^nl/i.test(a.lang) ? 0 : 1, nb = /^nl/i.test(b.lang) ? 0 : 1;
-      return na - nb;
-    });
+    if (row) row.style.display = "";
+    sel.innerHTML = "";
+    var def = document.createElement("option");
+    def.value = ""; def.textContent = "Standaard";
+    sel.appendChild(def);
     voices.forEach(function (v) {
       var o = document.createElement("option");
       o.value = v.voiceURI;
-      o.textContent = v.name + " (" + v.lang + ")";
+      o.textContent = friendlyVoiceName(v);
       if (App.settings.voiceURI === v.voiceURI) o.selected = true;
       sel.appendChild(o);
     });

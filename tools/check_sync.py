@@ -17,8 +17,18 @@ src = read("modules.js") + "\n" + read("app.js")
 # alle dubbele-aanhalingstekst-strings
 strings = re.findall(r'"((?:[^"\\]|\\.)*)"', src)
 
+# strings die wél als tekst voorkomen maar NIET door Hinnik worden ingesproken:
+# - menukaart-titels (staan in beeld, niet gesproken)
+# - bewuste toestel-stem-previews (moeten juist de toestel-stem laten horen)
+NIET_GESPROKEN = {
+    "Het bord", "De stukken", "Slaan", "Schaak en mat", "Een partijtje",
+    "Hoi! Zo klink ik.",
+}
+
 def looks_spoken(s):
     if "<" in s or "http" in s:
+        return False
+    if "/" in s:               # FEN-strings (bv. 4k3/8/8/...) zijn geen zinnen
         return False
     if not re.search(r"[a-zà-ÿ]", s):
         return False
@@ -33,6 +43,8 @@ def looks_spoken(s):
 missing = []
 for s in strings:
     if not looks_spoken(s):
+        continue
+    if s in NIET_GESPROKEN or s in mv.PRAISE:   # losse lof-woorden alleen samengesteld gebruikt
         continue
     if mv.norm(s) not in recorded:
         missing.append(s)

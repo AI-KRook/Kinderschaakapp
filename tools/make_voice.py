@@ -15,8 +15,8 @@ import os, re, json, asyncio, glob
 import edge_tts
 
 VOICES = [
-    {"id": "fenna",   "voice": "nl-NL-FennaNeural",   "rate": "-8%", "pitch": "+18Hz", "naam": "Meisjesstem (Fenna)"},
-    {"id": "maarten", "voice": "nl-NL-MaartenNeural", "rate": "-6%", "pitch": "+6Hz",  "naam": "Jongensstem (Maarten)"},
+    {"id": "fenna",   "voice": "nl-NL-FennaNeural",   "rate": "-8%", "pitch": "+18Hz", "naam": "Fenna (meisje)"},
+    {"id": "maarten", "voice": "nl-NL-MaartenNeural", "rate": "-6%", "pitch": "+6Hz",  "naam": "Maarten (jongen)"},
 ]
 
 HERE = os.path.dirname(__file__)
@@ -55,6 +55,7 @@ PHRASES = [
     "Wauw! Je kent nu alle stukken, en hoe ze lopen. Wat heb jij dat snel geleerd.",
     # module 3: slaan
     "Nu leren we slaan. Dat is: stukken van de tegenstander pakken.",
+    "Je slaat een stuk op de manier waarop dat stuk zelf loopt. Je zet jouw stuk op de plek van het andere.",
     "Soms staat er een stuk van de tegenstander in de weg. Weet je wat je dan mag doen? Het pakken! Dat heet slaan. Je zet jouw stuk op zijn plek.",
     "Pak het zwarte stuk met je toren. Tik op je toren, en dan op het zwarte stuk.",
     "Ook de loper kan slaan. Hij pakt schuin, want zo loopt hij ook.",
@@ -62,18 +63,47 @@ PHRASES = [
     "En nu de pion. Let goed op! De pion stapt rechtdoor, maar slaan doet hij schuin.",
     "Pak het zwarte stuk schuin met je pion!",
     "Hebbes! Lekker geslagen!", "Boem! Mooi gepakt!", "Ja! Dat ging knap!",
+    # en passant
+    "Nu komt een hele bijzondere! Het heet en passant. Dat is Frans voor: in het voorbijgaan.",
+    "Kijk goed. Mijn zwarte pion rent met twee stappen langs jouw pion. Hij denkt: lekker, jij kan mij niet pakken!",
+    "Maar dat mag jij juist wel! Jouw pion slaat hem schuin, alsof hij maar een stapje had gedaan.",
+    "Sla mijn pion en passant! Tik op jouw pion, en dan op het schuine vakje erachter.",
     "Knap! Maar let op: de tegenstander mag jouw stukken ook slaan. Bescherm ze dus goed.",
-    "Slaan kun je nu ook. Je wordt steeds beter, zeg!",
-    # module 4: schaak en mat
+    "Slaan kun je nu ook, en zelfs en passant! Je wordt steeds beter, zeg!",
+    # module 4: schaak, mat en rokeren
     "Nu komt het belangrijkste van schaken. Want waarom spelen we eigenlijk?",
     "Het doel van het hele spel is: de koning van de ander vangen. Dat heet schaakmat. En dan win je!",
     "Kijk, ik val de zwarte koning aan met mijn dame.",
     "Wordt een koning aangevallen? Dan heet dat schaak. De koning moet dan snel veilig worden.",
-    "En kan de koning helemaal niet meer ontsnappen? Dan is het schaakmat. Het spel is uit, en jij hebt gewonnen!",
-    "Nu jij! Kun jij de zwarte koning schaakmat zetten? In één zetje!",
-    "Tik op je toren, en zet hem helemaal naar boven. Vlak naast de koning.",
-    "Schaakmat! Je hebt het voor elkaar! Hoeraaa!",
+    "Sta je schaak? Dan kan je drie dingen doen om je koning te redden.",
+    "Eén: loop met je koning weg, naar een veilig vakje.",
+    "Twee: zet een ander stuk ervoor, als een schildje.",
+    "Drie: sla het stuk dat jouw koning aanvalt.",
+    "En kan de koning helemaal niet meer ontsnappen? Dan is het schaakmat. Het spel is uit!",
+    # zelf schaak geven
+    "Nu jij! Geef de zwarte koning eens schaak. Jaag hem op met je toren.",
+    "Schaak! Heel knap! De koning wordt nu aangevallen.",
+    "Dit was nog geen mat, want de koning kon nog weglopen. Maar goed gedaan, hoor!",
+    # rokeren
+    "Nu een slimme truc om je koning veilig te zetten. Het heet rokeren.",
+    "De koning en de toren bewegen samen, in één keer. De koning springt twee vakjes opzij, en de toren springt aan de andere kant naast hem.",
+    "Zo zit je koning lekker veilig in een hoekje, met de toren ervoor.",
+    "Doe de korte rokade. Tik op de koning, en zet hem twee vakjes naar rechts.",
+    "Knap! Je koning staat nu veilig in het hoekje.",
+    "En nu de lange rokade. Tik op de koning, en zet hem twee vakjes naar links.",
+    "Allebei gelukt! Nu ken je de korte en de lange rokade.",
+    "Maar let op, rokeren mag niet altijd!",
+    "Zie je die zwarte toren? De koning zou er vlak langs lopen. Door het gevaar heen rokeren mag niet. En ook niet als je koning al schaak staat.",
+    # mat-in-één oefenen
+    "Nu gaan we matzetten oefenen. Klaar voor de eerste?",
+    "Zet de zwarte koning schaakmat! Schuif je toren naar boven, vlak naast de koning.",
     "Een tipje: schuif je toren helemaal naar boven. Naar het bovenste rijtje.",
+    "Pak je dame, en zet hem vlak naast de zwarte koning. Jouw koning past goed op de dame.",
+    "Een tipje: zet je dame vlak naast de zwarte koning.",
+    "Nog eentje! Zet je dame helemaal naar boven, op het rijtje van de koning.",
+    "Een tipje: schuif je dame naar boven, naar het rijtje van de koning.",
+    "Schaakmat! Je hebt het voor elkaar! Hoeraaa!",
+    "Wauw! Je weet nu wat schaak is, en schaakmat, en je kan zelfs rokeren. Wat ben jij knap!",
     # module 5: een partijtje
     "Nu gaan we een echt partijtje spelen! Jij speelt met de witte stukken, ik met de zwarte.",
     "Onthoud: jij wint als je mijn koning schaakmat zet. En pas goed op je eigen koning!",

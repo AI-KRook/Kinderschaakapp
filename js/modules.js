@@ -16,6 +16,7 @@
     "Nog een poging, jij kan dit!"
   ];
   var COUNT = ["Eén ster!", "Twee sterren!", "Drie sterren!", "Vier sterren!"];
+  var SLAGEN = ["Hebbes! Lekker geslagen!", "Boem! Mooi gepakt!", "Ja! Dat ging knap!"];
 
   /* ============================ MODULE 1: HET BORD ============================ */
   async function moduleBoard(L) {
@@ -140,7 +141,7 @@
         L.unpoint();
         L.cheer();
         L.star();
-        await L.say(pick(["Hebbes! Lekker geslagen!", "Boem! Mooi gepakt!", "Ja! Dat ging knap!"]));
+        await L.say(pick(SLAGEN));
         return;
       } else {
         await L.say(pick(TRY_AGAIN));
@@ -150,19 +151,60 @@
     }
   }
 
+  // en passant: een hele bijzondere manier van slaan
+  var EP_FEN = "4k3/3p4/8/4P3/8/8/8/4K3 b - - 0 1";
+  function epSetup(L) {
+    L.board.setFEN(EP_FEN);
+    L.board.move("d7", "d5"); // de zwarte pion rent twee vakjes langs de witte pion
+    L.board.setMode("move");
+    L.board.setMovable(function (sq) { return sq === "e5"; });
+    L.point("d6");
+  }
+
+  async function enPassantRound(L) {
+    L.board.setFEN(EP_FEN);
+    L.board.setMode("locked");
+    await L.say("Nu komt een hele bijzondere! Het heet en passant. Dat is Frans voor: in het voorbijgaan.");
+    await L.say("Kijk goed. Mijn zwarte pion rent met twee stappen langs jouw pion. Hij denkt: lekker, jij kan mij niet pakken!");
+    await L.wait(250);
+    L.board.move("d7", "d5");
+    await L.wait(850);
+    await L.say("Maar dat mag jij juist wel! Jouw pion slaat hem schuin, alsof hij maar een stapje had gedaan.");
+    L.board.setMode("move");
+    L.board.setMovable(function (sq) { return sq === "e5"; });
+    L.point("d6");
+    await L.say("Sla mijn pion en passant! Tik op jouw pion, en dan op het schuine vakje erachter.");
+
+    while (true) {
+      var mv = await L.waitMove();
+      if (mv.to === "d6" && mv.captured) {
+        L.unpoint();
+        L.cheer();
+        L.star();
+        await L.say(pick(SLAGEN));
+        return;
+      }
+      await L.say(pick(TRY_AGAIN));
+      epSetup(L);
+    }
+  }
+
   async function moduleCapture(L) {
     await L.say("Nu leren we slaan. Dat is: stukken van de tegenstander pakken.");
+    await L.say("Je slaat een stuk op de manier waarop dat stuk zelf loopt. Je zet jouw stuk op de plek van het andere.");
     for (var i = 0; i < CAPTURES.length; i++) {
       await captureRound(L, CAPTURES[i]);
       await L.wait(300);
     }
+    await enPassantRound(L);
     await L.say("Knap! Maar let op: de tegenstander mag jouw stukken ook slaan. Bescherm ze dus goed.");
-    await L.say("Slaan kun je nu ook. Je wordt steeds beter, zeg!", { mood: "happy" });
+    await L.say("Slaan kun je nu ook, en zelfs en passant! Je wordt steeds beter, zeg!", { mood: "happy" });
     L.done();
   }
 
-  /* ============================ MODULE 4: SCHAAK EN MAT ============================ */
-  async function moduleCheckmate(L) {
+  /* ============================ MODULE 4: SCHAAK, MAT EN ROKEREN ============================ */
+
+  async function teachCheck(L) {
     L.board.setupCustom([
       { type: "k", color: "b", square: "e8" },
       { type: "q", color: "w", square: "d1" },
@@ -176,24 +218,126 @@
     L.board.move("d1", "d8");
     await L.wait(700);
     await L.say("Wordt een koning aangevallen? Dan heet dat schaak. De koning moet dan snel veilig worden.");
-    await L.say("En kan de koning helemaal niet meer ontsnappen? Dan is het schaakmat. Het spel is uit, en jij hebt gewonnen!", { mood: "happy" });
+    await L.say("Sta je schaak? Dan kan je drie dingen doen om je koning te redden.");
+    await L.say("Eén: loop met je koning weg, naar een veilig vakje.");
+    await L.say("Twee: zet een ander stuk ervoor, als een schildje.");
+    await L.say("Drie: sla het stuk dat jouw koning aanvalt.");
+    await L.say("En kan de koning helemaal niet meer ontsnappen? Dan is het schaakmat. Het spel is uit!", { mood: "happy" });
+  }
 
-    function setupPuzzle() {
+  // het kind geeft zelf schaak (nog geen mat)
+  async function giveCheck(L) {
+    L.board.setupCustom([
+      { type: "r", color: "w", square: "h1" },
+      { type: "k", color: "b", square: "e8" }
+    ], "w");
+    L.board.setMode("move");
+    L.board.setMovable("w");
+    L.point("h8");
+    await L.say("Nu jij! Geef de zwarte koning eens schaak. Jaag hem op met je toren.", { mood: "think" });
+    while (true) {
+      var mv = await L.waitMove();
+      if (L.board.inCheck()) {
+        L.unpoint();
+        L.cheer();
+        L.star();
+        await L.say("Schaak! Heel knap! De koning wordt nu aangevallen.", { mood: "happy" });
+        await L.say("Dit was nog geen mat, want de koning kon nog weglopen. Maar goed gedaan, hoor!");
+        return;
+      }
+      await L.say(pick(TRY_AGAIN));
       L.board.setupCustom([
-        { type: "k", color: "b", square: "g8" },
-        { type: "p", color: "b", square: "f7" },
-        { type: "p", color: "b", square: "g7" },
-        { type: "p", color: "b", square: "h7" },
-        { type: "r", color: "w", square: "a1" },
-        { type: "k", color: "w", square: "e1" }
+        { type: "r", color: "w", square: "h1" },
+        { type: "k", color: "b", square: "e8" }
       ], "w");
       L.board.setMode("move");
       L.board.setMovable("w");
+      L.point("h8");
     }
-    setupPuzzle();
-    await L.say("Nu jij! Kun jij de zwarte koning schaakmat zetten? In één zetje!", { mood: "think" });
-    await L.say("Tik op je toren, en zet hem helemaal naar boven. Vlak naast de koning.");
+  }
 
+  // rokeren: kort, lang, en waarom het soms niet mag
+  var ROK_KORT = "4k3/8/8/8/8/8/8/4K2R w K - 0 1";
+  var ROK_LANG = "4k3/8/8/8/8/8/8/R3K3 w Q - 0 1";
+  var ROK_NIET = "4kr2/8/8/8/8/8/8/4K2R w K - 0 1";
+
+  async function castleOnce(L, fen, flag, vraag) {
+    function setup() {
+      L.board.setFEN(fen);
+      L.board.setMode("move");
+      L.board.setMovable("w");
+    }
+    setup();
+    L.point(flag === "k" ? "g1" : "c1");
+    await L.say(vraag);
+    while (true) {
+      var mv = await L.waitMove();
+      if (mv.flags && mv.flags.indexOf(flag) >= 0) {
+        L.unpoint();
+        L.cheer();
+        L.star();
+        await L.wait(500);
+        return;
+      }
+      await L.say(pick(TRY_AGAIN));
+      setup();
+      L.point(flag === "k" ? "g1" : "c1");
+    }
+  }
+
+  async function teachCastling(L) {
+    L.board.setFEN(ROK_KORT);
+    L.board.setMode("locked");
+    await L.say("Nu een slimme truc om je koning veilig te zetten. Het heet rokeren.");
+    await L.say("De koning en de toren bewegen samen, in één keer. De koning springt twee vakjes opzij, en de toren springt aan de andere kant naast hem.");
+    await L.say("Zo zit je koning lekker veilig in een hoekje, met de toren ervoor.");
+
+    await castleOnce(L, ROK_KORT, "k", "Doe de korte rokade. Tik op de koning, en zet hem twee vakjes naar rechts.");
+    await L.say("Knap! Je koning staat nu veilig in het hoekje.");
+
+    await castleOnce(L, ROK_LANG, "q", "En nu de lange rokade. Tik op de koning, en zet hem twee vakjes naar links.");
+    await L.say("Allebei gelukt! Nu ken je de korte en de lange rokade.", { mood: "happy" });
+
+    L.board.setFEN(ROK_NIET);
+    L.board.setMode("locked");
+    await L.say("Maar let op, rokeren mag niet altijd!");
+    L.point("f8");
+    await L.say("Zie je die zwarte toren? De koning zou er vlak langs lopen. Door het gevaar heen rokeren mag niet. En ook niet als je koning al schaak staat.");
+    L.unpoint();
+    await L.wait(300);
+  }
+
+  // mat-in-één puzzels (allemaal vooraf in chess.js gecontroleerd)
+  var MATES = [
+    { pieces: [
+        { type: "k", color: "b", square: "g8" }, { type: "p", color: "b", square: "f7" },
+        { type: "p", color: "b", square: "g7" }, { type: "p", color: "b", square: "h7" },
+        { type: "r", color: "w", square: "a1" }, { type: "k", color: "w", square: "e1" } ],
+      point: "a8", hintFrom: "a1",
+      zeg: "Zet de zwarte koning schaakmat! Schuif je toren naar boven, vlak naast de koning.",
+      hint: "Een tipje: schuif je toren helemaal naar boven. Naar het bovenste rijtje." },
+    { pieces: [
+        { type: "k", color: "b", square: "a8" }, { type: "k", color: "w", square: "b6" },
+        { type: "q", color: "w", square: "a1" } ],
+      point: "a7", hintFrom: "a1",
+      zeg: "Pak je dame, en zet hem vlak naast de zwarte koning. Jouw koning past goed op de dame.",
+      hint: "Een tipje: zet je dame vlak naast de zwarte koning." },
+    { pieces: [
+        { type: "k", color: "b", square: "g8" }, { type: "p", color: "b", square: "f7" },
+        { type: "p", color: "b", square: "g7" }, { type: "p", color: "b", square: "h7" },
+        { type: "q", color: "w", square: "d1" }, { type: "k", color: "w", square: "e1" } ],
+      point: "d8", hintFrom: "d1",
+      zeg: "Nog eentje! Zet je dame helemaal naar boven, op het rijtje van de koning.",
+      hint: "Een tipje: schuif je dame naar boven, naar het rijtje van de koning." }
+  ];
+
+  async function matePuzzle(L, def) {
+    L.board.setupCustom(def.pieces, "w");
+    L.board.setMode("move");
+    L.board.setMovable("w");
+    L.board.clearGoals();
+    L.point(def.point);
+    await L.say(def.zeg, { mood: "think" });
     var tries = 0;
     while (true) {
       var mv = await L.waitMove();
@@ -202,7 +346,6 @@
         L.cheer();
         L.star();
         await L.say("Schaakmat! Je hebt het voor elkaar! Hoeraaa!", { mood: "happy" });
-        L.done();
         return;
       }
       tries++;
@@ -210,12 +353,29 @@
       L.board.undoLast();
       L.board.setMode("move");
       L.board.setMovable("w");
+      L.point(def.point);
       if (tries >= 2) {
-        L.board.showHintFrom("a1");
-        L.point("a8");
-        await L.say("Een tipje: schuif je toren helemaal naar boven. Naar het bovenste rijtje.");
+        L.board.showHintFrom(def.hintFrom);
+        await L.say(def.hint);
       }
     }
+  }
+
+  async function moduleCheckmate(L) {
+    await teachCheck(L);
+    await L.wait(300);
+    await giveCheck(L);
+    await L.wait(300);
+    await teachCastling(L);
+    await L.wait(300);
+    await L.say("Nu gaan we matzetten oefenen. Klaar voor de eerste?", { mood: "think" });
+    for (var i = 0; i < MATES.length; i++) {
+      await matePuzzle(L, MATES[i]);
+      await L.wait(400);
+    }
+    L.celebrate();
+    await L.say("Wauw! Je weet nu wat schaak is, en schaakmat, en je kan zelfs rokeren. Wat ben jij knap!", { mood: "happy" });
+    L.done();
   }
 
   /* ============================ MODULE 5: EEN PARTIJTJE ============================ */
@@ -274,7 +434,9 @@
       if (L.board.isGameOver()) break;
 
       await L.wait(650);
-      var bm = window.Bot.chooseMove(L.board.game, (window.App && App.settings.difficulty) || 1);
+      var level = (window.App && App.settings.difficulty) || 1;
+      var bm = await window.Bot.chooseMove(L.board.game, level);
+      if (!L.alive() || L.board.turn() !== "b") break; // les afgebroken of stand veranderd
       if (!bm) break;
       L.board.move(bm.from, bm.to);
       await L.wait(200);

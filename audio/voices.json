@@ -1,12 +1,12 @@
 [
   {
     "id": "fenna",
-    "naam": "Meisjesstem (Fenna)",
+    "naam": "Fenna (meisje)",
     "dir": "fenna"
   },
   {
     "id": "maarten",
-    "naam": "Jongensstem (Maarten)",
+    "naam": "Maarten (jongen)",
     "dir": "maarten"
   }
 ]

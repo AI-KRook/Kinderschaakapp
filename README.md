@@ -10,12 +10,12 @@ Geen account, geen reclame, geen tracking. Na de eerste keer laden werkt de app 
 - **Beeldmenu met iconen** (geen leesmenu) en grote knoppen.
 - **Sterren verzamelen.** Bij de oefeningen verdient het kind sterretjes. De teller op het menu groeit mee, wat uitnodigt om te blijven spelen en lessen te herhalen.
 - **Vijf korte lessen**, in volgorde te doen of los te kiezen:
-  1. **Het bord** — kennismaken met de vakjes.
-  2. **De stukken** — toren, loper, paard, dame, koning en pion, elk met een uitgebreide uitleg (hoe het loopt, sterk of zwak, een leuk weetje) en een **sterren-route**: het kind verzet het stuk meerdere keren om sterretjes te verzamelen. Veel herhaling, dus het blijft hangen.
-  3. **Slaan** — een stuk van de tegenstander pakken (ook de pion die schuin slaat).
-  4. **Schaak en mat** — uitleg en een mat-in-één om zelf op te lossen, met een hint als het lang duurt.
-  5. **Een partijtje** — een korte partij tegen een makkelijke computer, met aanmoediging en feest aan het eind.
-- **Ouder-knop** (het tandwiel ⚙️ linksboven): **houd het ongeveer 1 seconde ingedrukt** om de instellingen te openen. Daar kun je het geluid aan/uit zetten, de spreeksnelheid kiezen, de stem kiezen en de moeilijkheid van de computer instellen.
+  1. **Het bord.** Kennismaken met de vakjes.
+  2. **De stukken.** Toren, loper, paard, dame, koning en pion, elk met een uitgebreide uitleg (hoe het loopt, sterk of zwak, een leuk weetje) en een sterren-route: het kind verzet het stuk meerdere keren om sterretjes te verzamelen. Veel herhaling, dus het blijft hangen.
+  3. **Slaan.** Een stuk van de tegenstander pakken: recht, schuin, en de bijzondere en-passant-slag van de pion.
+  4. **Schaak en mat.** Wat schaak is en hoe je eruit komt, zelf schaak geven, rokeren (kort, lang, en wanneer het niet mag), en meerdere mat-in-één puzzels om zelf op te lossen, met een hint als het lang duurt.
+  5. **Een partijtje.** Een echte partij tegen de computer in vier niveaus, met aanmoediging en feest aan het eind.
+- **Ouder-knop** (het tandwiel ⚙️ linksboven): **houd het ongeveer 1 seconde ingedrukt** om de instellingen te openen. Daar kun je het geluid aan/uit zetten, de spreeksnelheid kiezen, de stem kiezen en de moeilijkheid van de computer in vier niveaus instellen.
 - **Geluidsknop** (🔊) rechtsboven: zet het geluid snel aan of uit. De knop laat duidelijk zien of het geluid aanstaat.
 
 ## Hoe start ik de app lokaal (op de computer)?
@@ -69,7 +69,8 @@ De makkelijkste manier is via **GitHub Pages**, want dan krijg je een `https`-ad
 
 - **Vanilla JavaScript**, geen framework, geen bouwstap.
 - **chess.js** (`vendor/chess.js`) voor alle schaakregels: legale zetten, schaak en mat.
-- **Stockfish** (`vendor/stockfish.js`, gratis en open source) draait in een Web Worker en wordt gebruikt als **coach** in het partijtje: er is een **hint-knop (💡)** waarmee het kind altijd een goede zet kan opvragen, en als het kind lang nadenkt komt Hinnik vanzelf met een tip (oplichtend vakje plus een wijzend handje). De engine is bewust géén sterke tegenstander; de computer-tegenstander blijft makkelijk te verslaan zodat het kind kan winnen.
+- **Stockfish** (`vendor/stockfish.js`, gratis en open source) draait in een Web Worker. Op volle sterkte is hij de **coach**: met de **hint-knop (💡)** kan het kind altijd een goede zet opvragen, en als het kind lang nadenkt komt Hinnik vanzelf met een tip (oplichtend vakje plus een wijzend handje). Als tegenstander wordt Stockfish alleen op niveau 4 ingezet, en dan op zijn zwakste stand. De engine krijgt zijn sterkte per opdracht mee, zodat de hint sterk blijft terwijl de tegenstander zwak speelt.
+- **Vier moeilijkheidsniveaus** voor het partijtje. Niveau 1 tot 3 zijn een zelfgemaakte tegenstander (willekeurig, materiaal pakken, en een slimmer niveau dat één zet vooruitkijkt maar af en toe expres blundert), zodat het kind altijd kan winnen. Niveau 4 is Stockfish op zijn zwakste stand, bedoeld voor grotere kinderen of een ouder; daar wint een kind van 5 zelden. De getallen ELO 100, 350 en 700 zijn een richtlijn voor het gevoel, geen gemeten waarde: zo laag kan de echte engine niet eens ingesteld worden.
 - **Tikken tijdens een uitleg = doorgaan.** Tikt het kind terwijl Hinnik nog praat, dan maakt zij haar zin meteen af en gaat het verder. Zo kan een ongeduldig kind doorklikken, maar niet per ongeluk te vroeg een stuk verzetten.
 - **De app onthoudt waar hij is.** Open je de instellingen tijdens een uitleg, dan pauzeert Hinnik en gaat ze verder waar ze gebleven was zodra je sluit. Instellingen-geluiden spelen op een apart kanaal, en losse opmerkingen of de hint onderbreken een uitleg niet. Zo loopt de les nooit vast.
 - **Coördinaten** (a tot h en 1 tot 8) staan in de rand-vakjes van het bord.
@@ -110,13 +111,10 @@ var CACHE = "hinnik-schaak-v1";   // maak hier bv. v2 van
 
 ## Wat bewust nog NIET in versie 1 zit
 
-Dit is een eerste werkende versie. Bewust nog niet meegenomen, voor een latere uitbreiding:
+Bewust nog niet meegenomen, voor een latere uitbreiding:
 
-- **Rokeren, en-passant en promotiekeuze** worden niet uitgelegd. (Promoveren gebeurt in een partijtje wel automatisch naar een dame, maar wordt niet als les behandeld.)
-- **Een sterke schaakcomputer.** De computer doet nu willekeurige of simpele zetten, zodat het kind kan winnen.
+- **Promotiekeuze.** Een pion die de overkant haalt wordt automatisch een dame; je kunt (nog) niet kiezen voor een ander stuk.
 - **Online spelen tegen anderen** en een account met voortgang in de cloud.
-- **Opgenomen audio / eigen ingesproken stem.** De app gebruikt nu de stem van het toestel. De kwaliteit van de Nederlandse stem verschilt per toestel.
-- **Een aparte "voor grote kinderen"-module** met de moeilijkere regels.
 - **Een visuele schaak-/mat-melding** op het bord (nu vooral met de stem uitgelegd).
 
 ## Mappenstructuur

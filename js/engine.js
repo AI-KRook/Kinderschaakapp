@@ -1,9 +1,14 @@
 /* =================================================================
-   Engine — Stockfish (gratis, open source) als hulpje.
-   Draait in een Web Worker, volledig in de browser. Wordt gebruikt om
-   het kind goede zetten te laten zien (hints), niet als sterke
-   tegenstander: het kind moet kunnen blijven winnen.
-   Laadt pas wanneer het voor het eerst nodig is (lui).
+   Engine — Stockfish (gratis, open source) als hulpje én als zwaarste
+   tegenstander. Draait in een Web Worker, volledig in de browser.
+   - Als coach (hints): op volle sterkte, zodat de tip altijd goed is.
+   - Als tegenstander op niveau 4: bewust op de zwakste stand
+     (UCI_LimitStrength), maar zelfs dan is hij sterk. Een kind van 5
+     wint hier waarschijnlijk niet; de zachte niveaus 1 tot 3 zijn om
+     te winnen.
+   De sterkte wordt per opdracht meegegeven, zodat hints en de
+   tegenstander los van elkaar staan. Laadt pas wanneer voor het eerst
+   nodig (lui).
    ================================================================= */
 (function () {
   "use strict";
@@ -13,6 +18,7 @@
   var initStarted = false;
   var queue = [];
   var current = null; // de finish-callback van de lopende opdracht
+  var engineMode = null; // "strong" | "weak"; voorkomt onnodig herinstellen
 
   function ensureInit() {
     if (initStarted) return;
@@ -35,7 +41,6 @@
   function handleLine(line) {
     if (!line) return;
     if (line.indexOf("uciok") >= 0) {
-      post("setoption name Skill Level value 20");
       post("isready");
     } else if (line.indexOf("readyok") >= 0) {
       ready = true;
@@ -53,15 +58,30 @@
     return { from: s.slice(0, 2), to: s.slice(2, 4), promotion: s.length > 4 ? s[4] : undefined };
   }
 
+  function applyMode(mode, elo) {
+    if (mode === engineMode) return;
+    engineMode = mode;
+    if (mode === "weak") {
+      post("setoption name UCI_LimitStrength value true");
+      post("setoption name UCI_Elo value " + (elo || 1350));
+      post("setoption name Skill Level value 0");
+    } else {
+      post("setoption name UCI_LimitStrength value false");
+      post("setoption name Skill Level value 20");
+    }
+  }
+
   function pump() {
     if (!ready || current || !queue.length) return;
     var job = queue.shift();
     current = job.cb;
+    applyMode(job.mode, job.elo);
     post("position fen " + job.fen);
     post("go " + job.go);
   }
 
-  // bestMove(fen, {movetime, depth, timeout}) -> Promise<{from,to,promotion}|null>
+  // bestMove(fen, {movetime, depth, timeout, elo}) -> Promise<{from,to,promotion}|null>
+  // Zonder elo: volle sterkte (coach/hint). Met elo: zwakke tegenstander.
   function bestMove(fen, opts) {
     opts = opts || {};
     ensureInit();
@@ -70,7 +90,10 @@
       var done = false;
       function finish(mv) { if (done) return; done = true; resolve(mv); }
       var go = opts.depth ? ("depth " + opts.depth) : ("movetime " + (opts.movetime || 500));
-      queue.push({ fen: fen, go: go, cb: finish });
+      queue.push({
+        fen: fen, go: go, cb: finish,
+        mode: opts.elo ? "weak" : "strong", elo: opts.elo || 0
+      });
       setTimeout(function () {
         if (!done) {
           if (current === finish) post("stop");
