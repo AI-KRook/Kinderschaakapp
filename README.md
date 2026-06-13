@@ -8,9 +8,10 @@ Geen account, geen reclame, geen tracking. Na de eerste keer laden werkt de app 
 
 - **Hinnik, de pratende mascotte.** Hij is altijd in beeld, legt elke stap hardop uit, beweegt zijn mond terwijl hij praat, juicht bij een goede zet en moedigt zacht aan bij een misser. Met de grote ronde knop met het luidsprekertje (🔊) herhaalt hij de laatste uitleg.
 - **Beeldmenu met iconen** (geen leesmenu) en grote knoppen.
+- **Sterren verzamelen.** Bij de oefeningen verdient het kind sterretjes. De teller op het menu groeit mee, wat uitnodigt om te blijven spelen en lessen te herhalen.
 - **Vijf korte lessen**, in volgorde te doen of los te kiezen:
   1. **Het bord** — kennismaken met de vakjes.
-  2. **De stukken** — toren, loper, paard, dame, koning en pion, elk met een eigen mini-les en een sterretje om te pakken.
+  2. **De stukken** — toren, loper, paard, dame, koning en pion, elk met een uitgebreide uitleg (hoe het loopt, sterk of zwak, een leuk weetje) en een **sterren-route**: het kind verzet het stuk meerdere keren om sterretjes te verzamelen. Veel herhaling, dus het blijft hangen.
   3. **Slaan** — een stuk van de tegenstander pakken (ook de pion die schuin slaat).
   4. **Schaak en mat** — uitleg en een mat-in-één om zelf op te lossen, met een hint als het lang duurt.
   5. **Een partijtje** — een korte partij tegen een makkelijke computer, met aanmoediging en feest aan het eind.

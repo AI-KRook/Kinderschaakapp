@@ -119,6 +119,14 @@
 
   Board.prototype.fen = function () { return this.game.fen(); };
   Board.prototype.turn = function () { return this.game.turn(); };
+
+  // zet de beurt (handig bij oefeningen waar hetzelfde stuk meerdere keren mag zetten)
+  Board.prototype.setTurn = function (color) {
+    var parts = this.game.fen().split(" ");
+    parts[1] = color;
+    parts[3] = "-";
+    try { this.game.load(parts.join(" ")); } catch (e) {}
+  };
   Board.prototype.get = function (square) { return this.game.get(square); };
 
   /* ---------- tekenen ---------- */

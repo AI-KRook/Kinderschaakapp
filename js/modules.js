@@ -1,7 +1,7 @@
 /* =================================================================
-   Modules — de leerlijn. Elke module is een verhaaltje dat Hinnik
-   vertelt en begeleidt, via de "L"-helper (zie app.js).
-   Tijdens een uitleg kan het kind tikken om door te gaan (skip).
+   Modules — de leerlijn. Hinnik legt alles uit en begeleidt.
+   Module 2 leert elk stuk grondig met een sterren-route (meerdere
+   oefeningen per stuk). Module 4 en 5 kaderen het doel van het spel.
    ================================================================= */
 (function () {
   "use strict";
@@ -15,6 +15,7 @@
     "Geeft niks! Probeer maar opnieuw.",
     "Nog een poging, jij kan dit!"
   ];
+  var COUNT = ["Eén ster!", "Twee sterren!", "Drie sterren!", "Vier sterren!"];
 
   /* ============================ MODULE 1: HET BORD ============================ */
   async function moduleBoard(L) {
@@ -23,6 +24,7 @@
     await L.say("Zullen we beginnen? Kijk eens, dit is het schaakbord.");
     await L.say("Het heeft een heleboel vakjes. Sommige zijn licht, en sommige zijn donker.");
     await L.say("Zie je dat ze om en om staan? Een beetje als een dambord.");
+    await L.say("Op dit bord spelen twee legers tegen elkaar: de witte stukken en de zwarte stukken.");
     await L.say("Tik maar eens op een vakje. Kijk wat er gebeurt!");
 
     var taps = 0;
@@ -38,70 +40,81 @@
   }
 
   /* ============================ MODULE 2: DE STUKKEN ============================ */
+  // path = route van sterretjes; elk volgend sterretje is met één zet te bereiken
   var PIECES = [
-    { type: "r", naam: "de toren", start: "d4", goal: "d8",
-      uitleg: "Dit is de toren. Hij rijdt kaarsrecht: naar voren, naar achteren, of opzij. Net een trein op de rails!" },
-    { type: "b", naam: "de loper", start: "c1", goal: "h6",
-      uitleg: "Dit is de loper. Hij schuift altijd schuin, lekker glijden, net een schaatser op het ijs!" },
-    { type: "n", naam: "het paard", start: "d4", goal: "f5",
-      uitleg: "Dit is het paard. Dat ben ik! Ik spring in de vorm van een letter L: twee stapjes vooruit en dan eentje opzij. Hop! En ik mag zelfs over andere stukken heen springen." },
-    { type: "q", naam: "de dame", start: "d4", goal: "h8",
-      uitleg: "Dit is de dame. Zij is de allersterkste! Zij mag rechtdoor en schuin, dus echt alle kanten op." },
-    { type: "k", naam: "de koning", start: "d4", goal: "e5",
-      uitleg: "Dit is de koning. Hij is de baas, maar een beetje langzaam. Hij zet steeds maar één klein stapje." },
-    { type: "p", naam: "de pion", start: "e2", goal: "e4",
-      uitleg: "Dit is de pion, het kleinste soldaatje. Hij stapt vooruit, eentje tegelijk. Alleen de eerste keer mag hij er twee. Maar nooit achteruit!" }
+    { type: "r", naam: "de toren", start: "a1", path: ["a5", "f5", "f2"],
+      uitleg: "Dit is de toren. Hij rijdt kaarsrecht, zoals een trein op de rails: naar voren, naar achteren, of opzij. Zo ver als hij wil, maar nooit schuin. De toren is een sterk stuk." },
+    { type: "b", naam: "de loper", start: "c1", path: ["h6", "f8", "a3"],
+      uitleg: "Dit is de loper. Hij glijdt altijd schuin, net een schaatser op het ijs. Zo ver als hij wil, maar alleen schuin. Let op: een loper blijft altijd op dezelfde kleur vakjes." },
+    { type: "n", naam: "het paard", start: "d4", path: ["f5", "d6", "b5"],
+      uitleg: "Dit is het paard. Dat ben ik! Ik spring in de vorm van een letter L: twee stapjes vooruit en dan eentje opzij. Hop! En het allerleukste: ik mag over andere stukken heen springen. Dat kan niemand anders." },
+    { type: "q", naam: "de dame", start: "d1", path: ["d4", "a7", "a1"],
+      uitleg: "Dit is de dame. Zij is het allersterkste stuk! Zij mag rechtdoor én schuin, alle kanten op, zo ver als ze wil. Pas dus goed op je dame, je wilt haar niet kwijtraken." },
+    { type: "k", naam: "de koning", start: "e4", path: ["e5", "d6", "c5"],
+      uitleg: "Dit is de koning. Hij is de baas van het spel, maar wel een beetje langzaam: hij zet steeds maar één klein stapje, in elke richting. De koning is het belangrijkste stuk, hem moet je goed beschermen." },
+    { type: "p", naam: "de pion", start: "e2", path: ["e4", "e5", "e6"],
+      uitleg: "Dit is de pion, het kleinste soldaatje. Hij stapt vooruit, eentje tegelijk. De allereerste keer mag hij twee stapjes. Hij gaat nooit achteruit. En weet je wat knap is? Komt een pion helemaal aan de overkant, dan wordt hij een dame!" }
   ];
 
   async function teachPiece(L, def) {
-    function setup() {
+    function place() {
       L.board.setupCustom([{ type: def.type, color: "w", square: def.start }], "w");
       L.board.setMode("move");
       L.board.setMovable("w");
-      L.board.setGoal(def.goal, "⭐");
     }
-    setup();
+    place();
     L.point(def.start);
     await L.say(def.uitleg);
     L.unpoint();
     await L.say("Tik op het stuk. De groene stipjes laten zien waar hij naartoe mag.");
-    await L.say("Probeer maar: kun jij het sterretje pakken?", { mood: "think" });
-    L.point(def.goal);
+    await L.say("Verzamel nu de sterretjes! Pak ze één voor één.");
 
-    while (true) {
-      var mv = await L.waitMove();
-      if (mv.to === def.goal) {
-        L.unpoint();
-        L.board.clearGoals();
-        L.cheer();
-        await L.say(pick(PRAISE) + " Je hebt het sterretje te pakken!");
-        return;
-      } else {
-        await L.say(pick(TRY_AGAIN));
-        setup();
-        L.point(def.goal);
+    for (var i = 0; i < def.path.length; i++) {
+      var target = def.path[i];
+      L.board.clearGoals();
+      L.board.setGoal(target, "⭐");
+      L.point(target);
+      while (true) {
+        var mv = await L.waitMove();
+        if (mv.to === target) {
+          L.cheer();
+          L.star();
+          L.board.setTurn("w"); // zodat hetzelfde stuk de volgende ster ook mag pakken
+          if (i < def.path.length - 1) L.blurt(COUNT[i] || "Hebbes!");
+          break;
+        } else {
+          await L.say(pick(TRY_AGAIN));
+          L.board.undoLast();
+          L.board.setMode("move");
+          L.board.setMovable("w");
+          L.board.setGoal(target, "⭐");
+          L.point(target);
+        }
       }
     }
+    L.unpoint();
+    L.board.clearGoals();
+    await L.say(pick(PRAISE) + " Je hebt alle sterretjes!");
   }
 
   async function modulePieces(L) {
-    await L.say("We gaan de stukken leren kennen. Eentje tegelijk, rustig aan.");
+    await L.say("We gaan de stukken leren kennen. Elk stuk loopt op zijn eigen manier. Eentje tegelijk, rustig aan.");
     for (var i = 0; i < PIECES.length; i++) {
       await teachPiece(L, PIECES[i]);
       await L.wait(300);
     }
     L.board.clearGoals();
-    await L.say("Wauw, je kent nu alle stukken! Wat heb jij dat snel geleerd.", { mood: "happy" });
+    await L.say("Wauw, je kent nu alle stukken en hoe ze lopen! Wat heb jij dat snel geleerd.", { mood: "happy" });
     L.done();
   }
 
   /* ============================ MODULE 3: SLAAN ============================ */
   var CAPTURES = [
     { white: { type: "r", square: "d1" }, black: { type: "p", square: "d6" },
-      zeg: "Soms staat er een stuk van de tegenstander in de weg. Weet je wat je dan mag doen? Het pakken! Dat heet slaan.",
+      zeg: "Soms staat er een stuk van de tegenstander in de weg. Weet je wat je dan mag doen? Het pakken! Dat heet slaan. Je zet jouw stuk op het vakje van het andere stuk.",
       hint: "Pak het zwarte stuk met je toren. Tik op je toren, en dan op het zwarte stuk." },
     { white: { type: "b", square: "c1" }, black: { type: "n", square: "g5" },
-      zeg: "Nu met de loper. Hij slaat schuin, want zo loopt hij ook.",
+      zeg: "Ook de loper kan slaan. Hij pakt schuin, want zo loopt hij ook.",
       hint: "Pak het zwarte paard met je loper!" },
     { white: { type: "p", square: "e4" }, black: { type: "p", square: "d5" },
       zeg: "En nu de pion. Let goed op: de pion stapt rechtdoor, maar slaan doet hij schuin!",
@@ -127,6 +140,7 @@
       if (mv.captured) {
         L.unpoint();
         L.cheer();
+        L.star();
         await L.say(pick(["Hebbes! Lekker geslagen!", "Boem! Mooi gepakt!", "Ja! Dat ging knap!"]));
         return;
       } else {
@@ -138,10 +152,12 @@
   }
 
   async function moduleCapture(L) {
+    await L.say("Nu leren we slaan: stukken van de tegenstander pakken.");
     for (var i = 0; i < CAPTURES.length; i++) {
       await captureRound(L, CAPTURES[i]);
       await L.wait(300);
     }
+    await L.say("Knap! Maar pas op: de tegenstander mag jouw stukken ook slaan. Bescherm ze dus goed.");
     await L.say("Slaan kun je nu ook. Je wordt steeds beter, zeg!", { mood: "happy" });
     L.done();
   }
@@ -154,13 +170,14 @@
       { type: "k", color: "w", square: "e1" }
     ], "w");
     L.board.setMode("locked");
-    await L.say("Nu leren we iets heel belangrijks: schaak.");
+    await L.say("Nu komt het belangrijkste van schaken. Want waarom spelen we eigenlijk?");
+    await L.say("Het doel van het hele spel is om de koning van de ander te vangen. Dat heet schaakmat, en dan win je!");
     await L.say("Kijk, ik val de zwarte koning aan met mijn dame.");
     await L.wait(300);
     L.board.move("d1", "d8");
     await L.wait(700);
-    await L.say("Wordt de koning aangevallen? Dan heet dat schaak. De koning moet dan goed oppassen.");
-    await L.say("En kan de koning niet meer ontsnappen? Dan is het schaakmat. Dan heb je gewonnen!", { mood: "happy" });
+    await L.say("Wordt een koning aangevallen? Dan heet dat schaak. De koning moet dan snel veilig worden.");
+    await L.say("En kan de koning helemaal niet meer ontsnappen? Dan is het schaakmat. Het spel is uit, en jij hebt gewonnen!", { mood: "happy" });
 
     function setupPuzzle() {
       L.board.setupCustom([
@@ -184,6 +201,7 @@
       if (L.board.inCheckmate()) {
         L.unpoint();
         L.cheer();
+        L.star();
         await L.say("Schaakmat! Je hebt het voor elkaar! Hoeraaa!", { mood: "happy" });
         L.done();
         return;
@@ -238,13 +256,12 @@
     if (window.Engine) window.Engine.warmup();
     makeHintButton(L);
 
-    await L.say("Nu gaan we een echt partijtje spelen! Jij speelt met de witte stukken.");
-    await L.say("Ik neem de zwarte. En jij mag beginnen, want wit zet altijd als eerste.");
-    await L.say("Tik op een stuk en zet het op een groene stip. Heb je hulp nodig? Tik dan op de lamp. Veel plezier!");
+    await L.say("Nu gaan we een echt partijtje spelen! Jij speelt met de witte stukken, ik met de zwarte.");
+    await L.say("Onthoud: jij wint als je mijn koning schaakmat zet. En pas ondertussen goed op je eigen koning!");
+    await L.say("Jij mag beginnen, want wit zet altijd als eerste. Heb je hulp nodig? Tik dan op de lamp. Veel plezier!");
 
     var moveCount = 0;
     while (true) {
-      // beurt van het kind, met hulp als het lang duurt
       L.board.setMovable("w");
       var hint = startHint(L, 15000);
       var mv = await L.waitMove();
@@ -257,7 +274,6 @@
       else if (moveCount % 4 === 0) L.blurt(pick(["Mooie zet!", "Goed bezig, ga zo door!", "Jij kan dit echt goed!"]));
       if (L.board.isGameOver()) break;
 
-      // beurt van de computer
       await L.wait(650);
       var bm = window.Bot.chooseMove(L.board.game, (window.App && App.settings.difficulty) || 1);
       if (!bm) break;
@@ -269,6 +285,7 @@
 
     L.celebrate();
     L.cheer();
+    L.star();
     var msg;
     if (L.board.inCheckmate()) {
       msg = (L.board.turn() === "b")

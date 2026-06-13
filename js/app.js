@@ -26,6 +26,17 @@
   function saveSettings() { try { localStorage.setItem("hinnik_settings", JSON.stringify(App.settings)); } catch (e) {} }
   function saveProgress() { try { localStorage.setItem("hinnik_progress", JSON.stringify(App.progress)); } catch (e) {} }
 
+  // sterren verzamelen (spel-element dat het kind motiveert te blijven spelen)
+  function addStar() {
+    App.progress.stars = (App.progress.stars || 0) + 1;
+    saveProgress();
+    updateStarCount();
+  }
+  function updateStarCount() {
+    var el = $("star-count");
+    if (el) el.textContent = String(App.progress.stars || 0);
+  }
+
   /* ---------- schermen ---------- */
   function showScreen(name) {
     ["screen-start", "screen-menu", "screen-lesson"].forEach(function (id) {
@@ -50,6 +61,7 @@
       card.addEventListener("click", function () { startModule(mod); });
       grid.appendChild(card);
     });
+    updateStarCount();
   }
 
   /* ---------- de "L"-helper voor modules (met netjes afbreken) ---------- */
@@ -80,6 +92,7 @@
       unpoint: function () { Paardje.stopPointing(); },
       cheer: function () { Paardje.cheer(); },
       celebrate: function () { celebrate(); },
+      star: function () { addStar(); },
       alive: function () { return !run.cancelled; },
       done: function () { onModuleDone(mod); }
     };

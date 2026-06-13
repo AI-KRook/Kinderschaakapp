@@ -175,6 +175,17 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
    MENU
    ================================================================= */
 .screen-menu { padding-bottom: 200px; }
+.star-banner {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  margin: 2px 18px 10px;
+  padding: 8px 16px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #fff, #fff4d6);
+  box-shadow: var(--shadow-soft);
+  font-weight: 800; color: var(--ink); font-size: 16px;
+}
+.star-banner-icon { font-size: 22px; display: inline-block; animation: pulse 1.8s ease-in-out infinite; }
+.star-banner #star-count { color: var(--sun-deep); }
 .menu-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
