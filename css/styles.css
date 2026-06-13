@@ -429,6 +429,9 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 .big-action.green { background: linear-gradient(180deg, var(--mint), var(--mint-deep)); }
 .big-action.coral { background: linear-gradient(180deg, var(--coral), var(--coral-deep)); }
 .big-action.sun { background: linear-gradient(180deg, var(--sun), var(--sun-deep)); color: var(--ink); }
+/* kleurkeuze partijtje: wit = licht, zwart = donker (logisch) */
+.big-action.pick-white { background: linear-gradient(180deg, #ffffff, #efe6d2); color: var(--ink); border: 2px solid #e2d6bd; box-shadow: 0 7px 0 #d8cbb2, var(--shadow); }
+.big-action.pick-black { background: linear-gradient(180deg, #5c4836, #2f2218); color: #fff; box-shadow: 0 7px 0 #1c120b, var(--shadow); }
 .big-action .ba-emoji { font-size: 24px; }
 
 /* =================================================================

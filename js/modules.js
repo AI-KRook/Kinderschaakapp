@@ -464,8 +464,8 @@
         });
         actions.appendChild(b);
       }
-      mk("w", "Wit", "♔", "sun");
-      mk("b", "Zwart", "♚", "coral");
+      mk("w", "Wit", "♔", "pick-white");
+      mk("b", "Zwart", "♚", "pick-black");
       L.blurt("Met welke stukken wil je spelen? Wit of zwart?");
     });
   }
