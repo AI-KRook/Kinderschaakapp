@@ -19,6 +19,7 @@
   var SILENT = AUDIO_BASE + "_silent.wav";
 
   var audioEl = null;
+  var previewEl = null; // apart kanaal voor instellingen-geluiden (verstoort de les niet)
   try {
     audioEl = new Audio();
     audioEl.preload = "auto";
@@ -26,7 +27,10 @@
     if ("preservesPitch" in audioEl) audioEl.preservesPitch = true;
     audioEl.mozPreservesPitch = true;
     audioEl.webkitPreservesPitch = true;
-  } catch (e) { audioEl = null; }
+    previewEl = new Audio();
+    previewEl.preload = "auto";
+    if ("preservesPitch" in previewEl) previewEl.preservesPitch = true;
+  } catch (e) { audioEl = audioEl || null; }
 
   var state = {
     enabled: true,
@@ -41,6 +45,8 @@
     audioMap: null,
     unlocked: false,
     speaking: false,
+    paused: false,       // tijdelijk gepauzeerd (bv. instellingen open)
+    usingAudio: false,   // speelt de huidige uitleg via mp3 (true) of synth/timer (false)?
     blocking: false,     // mag het kind deze uitleg overslaan met een tik?
     skipFn: null,        // maakt de huidige uitleg meteen af
     fallbackTimer: null,
@@ -123,6 +129,13 @@
         if (p && p.then) p.then(function () { try { audioEl.pause(); } catch (e) {} }).catch(function () {});
       } catch (e) {}
     }
+    if (previewEl) {
+      try {
+        previewEl.src = SILENT;
+        var pp = previewEl.play();
+        if (pp && pp.then) pp.then(function () { try { previewEl.pause(); } catch (e) {} }).catch(function () {});
+      } catch (e) {}
+    }
     if (synthSupported) {
       try { var u = new SpeechSynthesisUtterance(" "); u.volume = 0; synth.speak(u); synth.cancel(); } catch (e) {}
     }
@@ -160,10 +173,14 @@
   /* ---------- spreken ---------- */
   function speak(text, opts) {
     opts = opts || {};
+    // een losse opmerking (niet-blokkerend) mag een lopende uitleg niet onderbreken
+    if (!opts.block && state.speaking && state.blocking) return;
     if (opts.remember !== false) state.lastMessage = text;
     cancel(true);
     var myToken = ++state.token;
     state.blocking = !!opts.block;
+    state.usingAudio = false;
+    state.paused = false;
 
     var finished = false;
     function finish() {
@@ -176,6 +193,8 @@
       state.speaking = false;
       state.skipFn = null;
       state.blocking = false;
+      state.paused = false;
+      state.usingAudio = false;
       emit("text", "");
       emit("end");
       if (typeof opts.onEnd === "function") opts.onEnd();
@@ -194,6 +213,7 @@
 
   // opgenomen mp3
   function playRecorded(file, text, myToken, opts, finish) {
+    state.usingAudio = true;
     audioEl.onended = finish;
     audioEl.onerror = function () { if (myToken === state.token) speakSynth(text, myToken, opts, finish); };
     try {
@@ -207,6 +227,7 @@
 
   // terugval: Web Speech API
   function speakSynth(text, myToken, opts, finish) {
+    state.usingAudio = false;
     if (!synthSupported) { timedFallback(text, opts, finish); return; }
     var pieces = chunk(text);
     if (!pieces.length) { timedFallback(text, opts, finish); return; }
@@ -229,16 +250,68 @@
 
   // geen geluid: wel de tekstballon, en de les blijft doorlopen
   function timedFallback(text, opts, finish) {
+    state.usingAudio = false;
     var delay = Math.min(6000, Math.max(1200, (text || "").length * 55));
     state.fallbackTimer = setTimeout(finish, delay);
   }
 
-  function replay() { if (state.lastMessage) speak(state.lastMessage, { remember: false }); }
+  function replay() {
+    // tijdens een uitleg: herstart de huidige zin (de les blijft op zijn plek)
+    if (state.speaking && state.usingAudio && audioEl) {
+      try { audioEl.currentTime = 0; var p = audioEl.play(); if (p && p.catch) p.catch(function () {}); } catch (e) {}
+      return;
+    }
+    if (state.speaking) return; // een synth-uitleg loopt nog; laat die gewoon doorgaan
+    if (state.lastMessage) speak(state.lastMessage, { remember: false });
+  }
 
   // de huidige (blokkerende) uitleg meteen afmaken
   function skip() {
     if (state.speaking && state.blocking && typeof state.skipFn === "function") state.skipFn();
   }
+
+  // tijdelijk pauzeren (bv. tijdens instellingen) en weer hervatten op dezelfde plek
+  function pause() {
+    if (!state.speaking || state.paused) return;
+    state.paused = true;
+    stopKeepAlive();
+    if (state.usingAudio && audioEl) { try { audioEl.pause(); } catch (e) {} }
+    else if (synthSupported) { try { synth.pause(); } catch (e) {} }
+  }
+  function resume() {
+    if (!state.paused) return;
+    state.paused = false;
+    if (state.usingAudio && audioEl) { try { var p = audioEl.play(); if (p && p.catch) p.catch(function () {}); } catch (e) {} }
+    else if (synthSupported) { try { synth.resume(); startKeepAlive(); } catch (e) {} }
+  }
+
+  // geluid voor de instellingen, op een apart kanaal (verstoort de les niet)
+  function preview(text) {
+    if (!state.enabled) return;
+    stopPreview();
+    var file = (state.useRecorded && state.audioMap) ? state.audioMap[norm(text)] : null;
+    if (file && previewEl) {
+      try {
+        previewEl.src = packDir() + file;
+        previewEl.playbackRate = clampRate(state.rate);
+        if ("preservesPitch" in previewEl) previewEl.preservesPitch = true;
+        var pl = previewEl.play();
+        if (pl && pl.catch) pl.catch(function () {});
+        return;
+      } catch (e) {}
+    }
+    if (synthSupported) {
+      try {
+        var u = new SpeechSynthesisUtterance(text);
+        u.lang = (state.voice && state.voice.lang) || "nl-NL";
+        if (state.voice) u.voice = state.voice;
+        u.rate = Math.max(0.6, Math.min(1.4, state.rate));
+        u.pitch = state.pitch;
+        synth.speak(u);
+      } catch (e) {}
+    }
+  }
+  function stopPreview() { if (previewEl) { try { previewEl.pause(); } catch (e) {} } }
 
   function cancel(silent) {
     state.token++;
@@ -246,6 +319,8 @@
     state.speaking = false;
     state.skipFn = null;
     state.blocking = false;
+    state.paused = false;
+    state.usingAudio = false;
     if (state.fallbackTimer) { clearTimeout(state.fallbackTimer); state.fallbackTimer = null; }
     stopKeepAlive();
     if (audioEl) { try { audioEl.onended = null; audioEl.onerror = null; audioEl.pause(); } catch (e) {} }
@@ -255,7 +330,11 @@
   }
 
   /* ---------- instellingen ---------- */
-  function setEnabled(on) { state.enabled = !!on; if (!state.enabled) cancel(true); }
+  function setEnabled(on) {
+    state.enabled = !!on;
+    // niet hard afbreken (dat liet de les hangen): de huidige uitleg netjes afronden
+    if (!state.enabled && state.speaking && typeof state.skipFn === "function") state.skipFn();
+  }
   function setRate(r) { state.rate = clampRate(Number(r) || 1.0); }
   function setVoiceURI(uri) { state.voiceURI = uri || null; pickVoice(); }
   function setUseRecorded(on) { state.useRecorded = !!on; }
@@ -267,6 +346,10 @@
     speak: speak,
     replay: replay,
     skip: skip,
+    pause: pause,
+    resume: resume,
+    preview: preview,
+    stopPreview: stopPreview,
     cancel: cancel,
     isSpeaking: function () { return state.speaking; },
     isBlocking: function () { return state.speaking && state.blocking; },

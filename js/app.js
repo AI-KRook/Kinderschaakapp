@@ -195,11 +195,12 @@
   }
   function toggleSound() {
     setSound(!App.settings.sound);
-    if (App.settings.sound) Speech.speak("Het geluid staat weer aan!", { remember: false });
+    if (App.settings.sound) Speech.preview("Het geluid staat weer aan!");
   }
 
   /* ---------- ouder-instellingen ---------- */
   function openSettings() {
+    Speech.pause(); // pauzeer de lopende uitleg; bij sluiten gaat hij verder
     populateVoices();
     populateVoicePacks();
     $("set-rate").value = App.settings.rate;
@@ -210,8 +211,10 @@
     $("settings").setAttribute("aria-hidden", "false");
   }
   function closeSettings() {
+    Speech.stopPreview();
     $("settings").classList.remove("is-open");
     $("settings").setAttribute("aria-hidden", "true");
+    Speech.resume(); // ga verder met de uitleg waar hij gebleven was
   }
   function refreshDifficultyUI() {
     var wrap = $("set-difficulty");
@@ -307,16 +310,19 @@
     // instellingen
     $("set-close").addEventListener("click", closeSettings);
     $("settings").addEventListener("click", function (e) { if (e.target === $("settings")) closeSettings(); });
-    $("set-sound").addEventListener("click", function () { setSound(!App.settings.sound); });
+    $("set-sound").addEventListener("click", function () {
+      setSound(!App.settings.sound);
+      if (App.settings.sound) Speech.preview("Het geluid staat weer aan!");
+    });
     $("set-recorded").addEventListener("click", function () {
       App.settings.recorded = !App.settings.recorded;
       Speech.setUseRecorded(App.settings.recorded);
       $("set-recorded").setAttribute("aria-pressed", String(App.settings.recorded));
       saveSettings();
-      Speech.speak(App.settings.recorded ? "Hoi! Ik ben Hinnik het paardje. Zullen we samen leren schaken?" : "Zo klinkt de stem van het toestel.", { remember: false });
+      Speech.preview(App.settings.recorded ? "Hoi! Ik ben Hinnik het paardje. Zullen we samen leren schaken?" : "Zo klinkt de stem van het toestel.");
     });
     $("set-rate").addEventListener("input", function () { App.settings.rate = Number(this.value); Speech.setRate(App.settings.rate); });
-    $("set-rate").addEventListener("change", function () { saveSettings(); Speech.speak("Zo klink ik nu.", { remember: false }); });
+    $("set-rate").addEventListener("change", function () { saveSettings(); Speech.preview("Zo klink ik nu."); });
     $("set-difficulty").addEventListener("click", function (e) {
       var b = e.target.closest(".seg-btn"); if (!b) return;
       App.settings.difficulty = Number(b.dataset.level);
@@ -326,23 +332,20 @@
       App.settings.voiceURI = this.value || null;
       Speech.setVoiceURI(App.settings.voiceURI);
       saveSettings();
-      Speech.speak("Hoi! Zo klink ik.", { remember: false });
+      Speech.preview("Hoi! Zo klink ik.");
     });
-    $("set-test").addEventListener("click", function () { Speech.speak("Hoi! Ik ben Hinnik het paardje. Zullen we samen leren schaken?", { remember: false }); });
+    $("set-test").addEventListener("click", function () { Speech.preview("Hoi! Ik ben Hinnik het paardje. Zullen we samen leren schaken?"); });
     $("set-reset").addEventListener("click", function () {
       App.progress = {}; saveProgress(); buildMenu();
-      Speech.speak("Klaar! We kunnen weer helemaal opnieuw beginnen.", { remember: false });
+      Speech.preview("Klaar! We kunnen weer helemaal opnieuw beginnen.");
     });
 
     $("set-voicepack").addEventListener("change", function () {
       App.settings.voicePack = this.value;
       Speech.setVoicePack(this.value);
       saveSettings();
-      // herhaal de laatste zin meteen in de nieuwe stem (ook tijdens een les)
-      setTimeout(function () {
-        Speech.replay();
-        if (!Speech.isSpeaking()) Speech.speak("Zo klink ik nu.", { remember: false });
-      }, 400);
+      // laat de nieuwe stem horen op het preview-kanaal (de les blijft gepauzeerd)
+      setTimeout(function () { Speech.preview("Hoi! Ik ben Hinnik het paardje. Zullen we samen leren schaken?"); }, 350);
     });
 
     Speech.on("voices", populateVoices);
