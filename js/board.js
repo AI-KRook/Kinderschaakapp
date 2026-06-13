@@ -263,6 +263,9 @@
   };
 
   Board.prototype._onDown = function (e) {
+    // tikt het kind tijdens een uitleg? dan die uitleg meteen afmaken (doorgaan),
+    // en de tik niet als zet behandelen.
+    if (window.Speech && Speech.isBlocking()) { e.preventDefault(); Speech.skip(); return; }
     if (this.mode === "locked") return;
     var sq = this._squareFromPoint(e.clientX, e.clientY);
     if (!sq) return;

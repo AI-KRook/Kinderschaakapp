@@ -2,16 +2,12 @@
    Speech — praat hardop in het Nederlands.
 
    Twee bronnen, in deze volgorde:
-   1. Vooraf opgenomen neurale stem (mp3 in audio/, zie audio/manifest.json).
-      Mooie, natuurlijke Nederlandse stem. Volledig offline, geen tracking.
-   2. Web Speech API (SpeechSynthesis) als terugval voor zinnen zonder opname
-      of als de ouder de toestel-stem verkiest.
+   1. Vooraf opgenomen neurale stem (mp3 in audio/<stem>/).
+   2. Web Speech API (SpeechSynthesis) als terugval.
 
-   Houdt rekening met de iOS Safari valkuilen:
-   - geluid pas na een tik   -> unlock() bij de eerste gebruikersactie
-   - stemmen laden vertraagd  -> wacht op 'voiceschanged' (voor de terugval)
-   - lange zinnen afgekapt     -> knip in stukjes (alleen bij de terugval)
-   - duidelijke aan/uit-knop  -> setEnabled + visuele status
+   Extra: een uitleg kan "blokkerend" zijn. Tikt het kind tijdens een
+   blokkerende uitleg, dan maakt Hinnik de zin meteen af (skip), zodat
+   het kind kan doorgaan maar niet per ongeluk te vroeg een zet doet.
    ================================================================= */
 (function () {
   "use strict";
@@ -26,7 +22,7 @@
   try {
     audioEl = new Audio();
     audioEl.preload = "auto";
-    audioEl.src = SILENT;       // alvast klaarzetten voor het ontgrendelen
+    audioEl.src = SILENT;
     if ("preservesPitch" in audioEl) audioEl.preservesPitch = true;
     audioEl.mozPreservesPitch = true;
     audioEl.webkitPreservesPitch = true;
@@ -40,11 +36,14 @@
     voice: null,
     voiceURI: null,
     voices: [],
-    voicePack: "fenna",   // gekozen opgenomen stem
-    voicePacks: [],       // beschikbare opgenomen stemmen (uit voices.json)
-    audioMap: null,       // { genormaliseerde tekst: bestandsnaam }
+    voicePack: "fenna",
+    voicePacks: [],
+    audioMap: null,
     unlocked: false,
     speaking: false,
+    blocking: false,     // mag het kind deze uitleg overslaan met een tik?
+    skipFn: null,        // maakt de huidige uitleg meteen af
+    fallbackTimer: null,
     lastMessage: "",
     queue: [],
     token: 0
@@ -54,6 +53,7 @@
   function emit(name, arg) { listeners[name].forEach(function (fn) { try { fn(arg); } catch (e) {} }); }
 
   function norm(s) { return String(s).replace(/\s+/g, " ").trim().toLowerCase(); }
+  function clampRate(r) { return Math.max(0.6, Math.min(1.6, r)); }
 
   /* ---------- opgenomen stemmen laden ---------- */
   function packDir() { return AUDIO_BASE + state.voicePack + "/"; }
@@ -77,21 +77,17 @@
       return r.ok ? r.json() : null;
     }).then(function (map) {
       if (map && typeof map === "object") state.audioMap = map;
-    }).catch(function () { /* geen opnames: we vallen terug op de toestel-stem */ });
+    }).catch(function () { });
   }
 
-  function setVoicePack(id) {
-    if (!id) return;
-    state.voicePack = id;
-    loadManifest();
-  }
+  function setVoicePack(id) { if (!id) return; state.voicePack = id; loadManifest(); }
 
   function fileFor(text) {
     if (!state.useRecorded || !state.audioMap || !audioEl) return null;
     return state.audioMap[norm(text)] || null;
   }
 
-  /* ---------- stemmen kiezen (voor de terugval) ---------- */
+  /* ---------- stemmen kiezen (terugval) ---------- */
   function pickVoice() {
     if (!synthSupported) return;
     var list = synth.getVoices() || [];
@@ -112,19 +108,14 @@
       if (typeof synth.addEventListener === "function") synth.addEventListener("voiceschanged", pickVoice);
       else synth.onvoiceschanged = pickVoice;
       var tries = 0;
-      var iv = setInterval(function () {
-        tries++;
-        pickVoice();
-        if (state.voices.length || tries > 20) clearInterval(iv);
-      }, 250);
+      var iv = setInterval(function () { tries++; pickVoice(); if (state.voices.length || tries > 20) clearInterval(iv); }, 250);
     }
   }
 
-  /* ---------- ontgrendelen (iOS vereist een gebruikersactie) ---------- */
+  /* ---------- ontgrendelen (iOS) ---------- */
   function unlock() {
     if (state.unlocked) return;
     state.unlocked = true;
-    // het audio-element ontgrendelen met een kort stil fragment
     if (audioEl) {
       try {
         audioEl.src = SILENT;
@@ -132,17 +123,12 @@
         if (p && p.then) p.then(function () { try { audioEl.pause(); } catch (e) {} }).catch(function () {});
       } catch (e) {}
     }
-    // ook de SpeechSynthesis ontgrendelen
     if (synthSupported) {
-      try {
-        var u = new SpeechSynthesisUtterance(" ");
-        u.volume = 0;
-        synth.speak(u); synth.cancel();
-      } catch (e) {}
+      try { var u = new SpeechSynthesisUtterance(" "); u.volume = 0; synth.speak(u); synth.cancel(); } catch (e) {}
     }
   }
 
-  /* ---------- tekst in stukjes knippen (alleen voor de terugval) ---------- */
+  /* ---------- tekst in stukjes (alleen terugval) ---------- */
   function chunk(text) {
     var clean = norm(text);
     if (!clean) return [];
@@ -171,62 +157,64 @@
   }
   function stopKeepAlive() { if (keepAlive) { clearInterval(keepAlive); keepAlive = null; } }
 
-  /* ---------- het hart: spreek een bericht uit ---------- */
+  /* ---------- spreken ---------- */
   function speak(text, opts) {
     opts = opts || {};
     if (opts.remember !== false) state.lastMessage = text;
     cancel(true);
     var myToken = ++state.token;
+    state.blocking = !!opts.block;
 
-    if (!state.enabled) { timedFallback(text, myToken, opts); return; }
+    var finished = false;
+    function finish() {
+      if (finished || myToken !== state.token) return;
+      finished = true;
+      if (state.fallbackTimer) { clearTimeout(state.fallbackTimer); state.fallbackTimer = null; }
+      stopKeepAlive();
+      if (audioEl) { try { audioEl.onended = null; audioEl.onerror = null; audioEl.pause(); } catch (e) {} }
+      if (synthSupported) { try { synth.cancel(); } catch (e) {} }
+      state.speaking = false;
+      state.skipFn = null;
+      state.blocking = false;
+      emit("text", "");
+      emit("end");
+      if (typeof opts.onEnd === "function") opts.onEnd();
+    }
+    state.skipFn = finish;
+    state.speaking = true;
+    emit("start");
+    emit("text", text);
 
+    if (!state.enabled) { timedFallback(text, opts, finish); return; }
     var file = fileFor(text);
-    if (file) { playRecorded(file, text, myToken, opts); return; }
-    if (synthSupported) { speakSynth(text, myToken, opts); return; }
-    timedFallback(text, myToken, opts);
+    if (file) { playRecorded(file, text, myToken, opts, finish); return; }
+    if (synthSupported) { speakSynth(text, myToken, opts, finish); return; }
+    timedFallback(text, opts, finish);
   }
 
-  // 1) opgenomen mp3 afspelen
-  function playRecorded(file, text, myToken, opts) {
-    state.speaking = true;
-    emit("start"); emit("text", text);
-    var done = function () {
-      if (myToken !== state.token) return;
-      audioEl.onended = null; audioEl.onerror = null;
-      state.speaking = false;
-      emit("text", ""); emit("end");
-      if (typeof opts.onEnd === "function") opts.onEnd();
-    };
-    audioEl.onended = done;
-    audioEl.onerror = function () { if (myToken === state.token) speakSynth(text, myToken, opts); };
+  // opgenomen mp3
+  function playRecorded(file, text, myToken, opts, finish) {
+    audioEl.onended = finish;
+    audioEl.onerror = function () { if (myToken === state.token) speakSynth(text, myToken, opts, finish); };
     try {
       audioEl.src = packDir() + file;
-      audioEl.playbackRate = Math.max(0.6, Math.min(1.6, state.rate));
+      audioEl.playbackRate = clampRate(state.rate);
       if ("preservesPitch" in audioEl) audioEl.preservesPitch = true;
       var p = audioEl.play();
-      if (p && p.catch) p.catch(function () { if (myToken === state.token) speakSynth(text, myToken, opts); });
-    } catch (e) {
-      speakSynth(text, myToken, opts);
-    }
+      if (p && p.catch) p.catch(function () { if (myToken === state.token) speakSynth(text, myToken, opts, finish); });
+    } catch (e) { speakSynth(text, myToken, opts, finish); }
   }
 
-  // 2) terugval: Web Speech API (in stukjes)
-  function speakSynth(text, myToken, opts) {
-    if (!synthSupported) { timedFallback(text, myToken, opts); return; }
+  // terugval: Web Speech API
+  function speakSynth(text, myToken, opts, finish) {
+    if (!synthSupported) { timedFallback(text, opts, finish); return; }
     var pieces = chunk(text);
-    if (!pieces.length) { timedFallback(text, myToken, opts); return; }
+    if (!pieces.length) { timedFallback(text, opts, finish); return; }
     state.queue = pieces.slice();
-    state.speaking = true;
-    emit("start"); emit("text", text);
     startKeepAlive();
     function next() {
       if (myToken !== state.token) return;
-      if (!state.queue.length) {
-        state.speaking = false; stopKeepAlive();
-        emit("text", ""); emit("end");
-        if (typeof opts.onEnd === "function") opts.onEnd();
-        return;
-      }
+      if (!state.queue.length) { finish(); return; }
       var u = new SpeechSynthesisUtterance(state.queue.shift());
       u.lang = (state.voice && state.voice.lang) || "nl-NL";
       if (state.voice) u.voice = state.voice;
@@ -239,25 +227,26 @@
     setTimeout(next, 90);
   }
 
-  // 3) geen geluid (gedempt of niets beschikbaar): wel de tekstballon, en de les laten doorlopen
-  function timedFallback(text, myToken, opts) {
-    emit("start"); emit("text", text);
-    state.speaking = true;
+  // geen geluid: wel de tekstballon, en de les blijft doorlopen
+  function timedFallback(text, opts, finish) {
     var delay = Math.min(6000, Math.max(1200, (text || "").length * 55));
-    setTimeout(function () {
-      if (myToken !== state.token) return;
-      state.speaking = false;
-      emit("text", ""); emit("end");
-      if (typeof opts.onEnd === "function") opts.onEnd();
-    }, delay);
+    state.fallbackTimer = setTimeout(finish, delay);
   }
 
   function replay() { if (state.lastMessage) speak(state.lastMessage, { remember: false }); }
+
+  // de huidige (blokkerende) uitleg meteen afmaken
+  function skip() {
+    if (state.speaking && state.blocking && typeof state.skipFn === "function") state.skipFn();
+  }
 
   function cancel(silent) {
     state.token++;
     state.queue = [];
     state.speaking = false;
+    state.skipFn = null;
+    state.blocking = false;
+    if (state.fallbackTimer) { clearTimeout(state.fallbackTimer); state.fallbackTimer = null; }
     stopKeepAlive();
     if (audioEl) { try { audioEl.onended = null; audioEl.onerror = null; audioEl.pause(); } catch (e) {} }
     if (synthSupported) { try { synth.cancel(); } catch (e) {} }
@@ -267,7 +256,7 @@
 
   /* ---------- instellingen ---------- */
   function setEnabled(on) { state.enabled = !!on; if (!state.enabled) cancel(true); }
-  function setRate(r) { state.rate = Math.max(0.6, Math.min(1.4, Number(r) || 1.0)); }
+  function setRate(r) { state.rate = clampRate(Number(r) || 1.0); }
   function setVoiceURI(uri) { state.voiceURI = uri || null; pickVoice(); }
   function setUseRecorded(on) { state.useRecorded = !!on; }
 
@@ -277,8 +266,10 @@
     unlock: unlock,
     speak: speak,
     replay: replay,
+    skip: skip,
     cancel: cancel,
     isSpeaking: function () { return state.speaking; },
+    isBlocking: function () { return state.speaking && state.blocking; },
     isEnabled: function () { return state.enabled; },
     isSupported: function () { return synthSupported || !!state.audioMap; },
     hasRecorded: function () { return !!state.audioMap; },

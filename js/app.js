@@ -69,7 +69,7 @@
         if (opts.mood === "happy") Paardje.cheer();
         if (opts.mood === "think") Paardje.nudge();
         return tracked(function (resolve) {
-          Speech.speak(text, { remember: opts.remember !== false, onEnd: resolve });
+          Speech.speak(text, { remember: opts.remember !== false, block: true, onEnd: resolve });
         });
       },
       blurt: function (text) { Speech.speak(text, { remember: false }); },
@@ -145,8 +145,8 @@
     }
 
     setTimeout(function () {
-      if (next) Speech.speak("Tik op het groene pijltje voor het volgende spel. Of op de oranje knop om dit nog eens te doen.", { remember: false });
-      else Speech.speak("Je hebt alles gedaan! Wat knap! Tik op het huisje om terug te gaan.", { remember: false });
+      if (next) Speech.speak("Tik op het groene pijltje voor het volgende spelletje. Of op de oranje knop om dit nog eens te doen.", { remember: false });
+      else Speech.speak("Je hebt alles gedaan! Wat knap, zeg! Tik op het huisje om terug te gaan.", { remember: false });
     }, 900);
   }
 
@@ -157,7 +157,7 @@
     clearLessonActions();
     showScreen("menu");
     buildMenu();
-    Speech.speak("Kies maar wat je wilt leren!", { remember: false });
+    Speech.speak("Wat wil je nu doen? Kies maar een plaatje!", { remember: false });
   }
 
   /* ---------- feest / confetti ---------- */
@@ -366,7 +366,7 @@
     buildMenu();
     // korte testzin: ontgrendelt en verwelkomt
     setTimeout(function () {
-      Speech.speak("Hoi! Ik ben Hinnik. Wat leuk dat je er bent! Kies maar een plaatje om te leren.", { remember: false });
+      Speech.speak("Hoi! Ik ben Hinnik, het schaakpaardje. Wat leuk dat je er bent! Kies maar een plaatje, dan gaan we samen schaken leren.", { remember: false });
     }, 250);
   }
 
