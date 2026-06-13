@@ -3,7 +3,7 @@
    Cachet alle app-bestanden bij de installatie en serveert ze daarna
    uit de cache (cache-first). Verhoog CACHE bij elke nieuwe versie.
    ================================================================= */
-var CACHE = "hinnik-schaak-v3";
+var CACHE = "hinnik-schaak-v4";
 
 var ASSETS = [
   "./",
@@ -11,10 +11,12 @@ var ASSETS = [
   "manifest.json",
   "css/styles.css",
   "vendor/chess.js",
+  "vendor/stockfish.js",
   "js/speech.js",
   "js/mascotte.js",
   "js/board.js",
   "js/bot.js",
+  "js/engine.js",
   "js/modules.js",
   "js/app.js",
   "icons/icon-192.png",

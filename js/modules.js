@@ -206,19 +206,41 @@
   }
 
   /* ============================ MODULE 5: EEN PARTIJTJE ============================ */
+  // laat het kind een goede zet zien als het lang nadenkt (hulp van de engine)
+  function startHint(L, delay) {
+    var state = { moved: false, timer: null };
+    state.timer = setTimeout(function () {
+      if (state.moved || !L.alive() || !window.Engine) return;
+      if (L.board.turn() !== "w") return;
+      window.Engine.bestMove(L.board.fen(), { movetime: 600 }).then(function (best) {
+        if (state.moved || !best || !L.alive() || L.board.turn() !== "w") return;
+        L.board.showHintFrom(best.from);
+        L.point(best.to);
+        L.blurt("Zal ik je helpen? Probeer dit stuk eens naar het lichtende vakje te zetten.");
+      });
+    }, delay);
+    return state;
+  }
+
   async function modulePlay(L) {
     L.board.reset();
     L.board.setMode("move");
     L.board.setMovable("w");
+    if (window.Engine) window.Engine.warmup();
     await L.say("Nu spelen we een echt partijtje! Jij bent wit.");
     await L.say("Ik speel met de zwarte stukken. Jij mag beginnen!");
     await L.say("Tik op een stuk en zet hem op een groene stip.");
 
     var moveCount = 0;
     while (true) {
-      // beurt van het kind
+      // beurt van het kind, met hulp als het lang duurt
       L.board.setMovable("w");
+      var hint = startHint(L, 13000);
       var mv = await L.waitMove();
+      hint.moved = true;
+      if (hint.timer) clearTimeout(hint.timer);
+      L.board.clearHighlights();
+      L.unpoint();
       moveCount++;
       if (mv.captured) L.blurt(pick(["Lekker geslagen!", "Hebbes!", "Goeie!"]));
       else if (moveCount % 4 === 0) L.blurt(pick(["Mooie zet!", "Goed bezig!", "Je doet het knap!"]));

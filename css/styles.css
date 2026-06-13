@@ -254,6 +254,17 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 .cell.light { background: var(--sq-light); }
 .cell.dark  { background: var(--sq-dark); }
 
+/* coördinaten (a-h en 1-8) in de rand-vakjes */
+.coord {
+  position: absolute;
+  font-size: calc(var(--cell, 44px) * 0.22);
+  font-weight: 800; line-height: 1; pointer-events: none; opacity: .85;
+}
+.coord.rank { top: 3px; left: 4px; }
+.coord.file { bottom: 2px; right: 4px; }
+.cell.light .coord { color: var(--sq-dark); }
+.cell.dark  .coord { color: var(--sq-light); }
+
 /* legale doelvelden */
 .cell .dot {
   position: absolute; width: 30%; height: 30%; border-radius: 50%;
@@ -332,9 +343,11 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 .piece.black .piece-glyph { color: #43342a; -webkit-text-stroke: 1.4px #1d130c; text-shadow: 0 2px 3px rgba(0,0,0,.22); }
 .piece.lift { z-index: 9; }
 .piece.lift .piece-glyph { transform: scale(1.18); filter: drop-shadow(0 8px 8px rgba(0,0,0,.3)); }
-.piece.pop { animation: pop .35s ease; }
+/* plop en wegslaan animeren het GLYPH (niet het stuk), zodat de positie
+   (transform: translate op .piece) niet wordt overschreven -> geen flits naar a8 */
+.piece.pop .piece-glyph { animation: pop .35s ease; }
 @keyframes pop { 0%{transform:scale(1);} 40%{transform:scale(1.22);} 100%{transform:scale(1);} }
-.piece.captured { animation: captured .35s ease forwards; }
+.piece.captured .piece-glyph { animation: captured .4s ease forwards; }
 @keyframes captured { to { transform: scale(0) rotate(40deg); opacity: 0; } }
 .piece.dragging { transition: none; }
 

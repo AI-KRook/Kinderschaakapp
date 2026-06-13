@@ -43,6 +43,19 @@
         var dot = document.createElement("span");
         dot.className = "dot";
         cell.appendChild(dot);
+        // coördinaten: cijfer 8..1 op de linkerkolom, letter a..h op de onderste rij
+        if (col === 0) {
+          var rk = document.createElement("span");
+          rk.className = "coord rank";
+          rk.textContent = String(8 - row);
+          cell.appendChild(rk);
+        }
+        if (row === 7) {
+          var fl = document.createElement("span");
+          fl.className = "coord file";
+          fl.textContent = FILES[col];
+          cell.appendChild(fl);
+        }
         el.appendChild(cell);
         this.cellBySquare[sq] = cell;
       }

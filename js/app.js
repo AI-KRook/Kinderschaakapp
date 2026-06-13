@@ -80,6 +80,7 @@
       unpoint: function () { Paardje.stopPointing(); },
       cheer: function () { Paardje.cheer(); },
       celebrate: function () { celebrate(); },
+      alive: function () { return !run.cancelled; },
       done: function () { onModuleDone(mod); }
     };
   }
@@ -263,32 +264,32 @@
 
   /* ---------- ouder-knop: lang ingedrukt houden ---------- */
   function setupParentButton() {
-    var btn = $("parent-btn");
-    var fill = btn.querySelector(".parent-ring-fill");
-    var raf = null, startT = 0;
     var HOLD = 1200;
-
-    function frame(now) {
-      var p = Math.min(1, (now - startT) / HOLD);
-      fill.style.setProperty("--p", (p * 360) + "deg");
-      if (p >= 1) { stop(); openSettings(); return; }
-      raf = requestAnimationFrame(frame);
-    }
-    function start(e) {
-      e.preventDefault();
-      btn.classList.add("holding");
-      startT = performance.now();
-      raf = requestAnimationFrame(frame);
-    }
-    function stop() {
-      if (raf) cancelAnimationFrame(raf); raf = null;
-      btn.classList.remove("holding");
-      fill.style.setProperty("--p", "0deg");
-    }
-    btn.addEventListener("pointerdown", start);
-    btn.addEventListener("pointerup", stop);
-    btn.addEventListener("pointerleave", stop);
-    btn.addEventListener("pointercancel", stop);
+    Array.prototype.forEach.call(document.querySelectorAll(".parent-btn"), function (btn) {
+      var fill = btn.querySelector(".parent-ring-fill");
+      var raf = null, startT = 0;
+      function frame(now) {
+        var p = Math.min(1, (now - startT) / HOLD);
+        if (fill) fill.style.setProperty("--p", (p * 360) + "deg");
+        if (p >= 1) { stop(); openSettings(); return; }
+        raf = requestAnimationFrame(frame);
+      }
+      function start(e) {
+        e.preventDefault();
+        btn.classList.add("holding");
+        startT = performance.now();
+        raf = requestAnimationFrame(frame);
+      }
+      function stop() {
+        if (raf) cancelAnimationFrame(raf); raf = null;
+        btn.classList.remove("holding");
+        if (fill) fill.style.setProperty("--p", "0deg");
+      }
+      btn.addEventListener("pointerdown", start);
+      btn.addEventListener("pointerup", stop);
+      btn.addEventListener("pointerleave", stop);
+      btn.addEventListener("pointercancel", stop);
+    });
   }
 
   /* ---------- alle knoppen koppelen ---------- */
@@ -337,8 +338,10 @@
       App.settings.voicePack = this.value;
       Speech.setVoicePack(this.value);
       saveSettings();
+      // herhaal de laatste zin meteen in de nieuwe stem (ook tijdens een les)
       setTimeout(function () {
-        Speech.speak("Hoi! Ik ben Hinnik het paardje. Zullen we samen leren schaken?", { remember: false });
+        Speech.replay();
+        if (!Speech.isSpeaking()) Speech.speak("Zo klink ik nu.", { remember: false });
       }, 400);
     });
 

@@ -68,6 +68,8 @@ De makkelijkste manier is via **GitHub Pages**, want dan krijg je een `https`-ad
 
 - **Vanilla JavaScript**, geen framework, geen bouwstap.
 - **chess.js** (`vendor/chess.js`) voor alle schaakregels: legale zetten, schaak en mat.
+- **Stockfish** (`vendor/stockfish.js`, gratis en open source) draait in een Web Worker en wordt gebruikt als **coach**: als het kind in het partijtje lang nadenkt, laat Hinnik een goede zet zien (oplichtend vakje plus een wijzend handje). De engine is bewust géén sterke tegenstander; de computer-tegenstander blijft makkelijk te verslaan zodat het kind kan winnen.
+- **Coördinaten** (a tot h en 1 tot 8) staan in de rand-vakjes van het bord.
 - **Stem:** Hinnik praat met een **vooraf opgenomen neurale stem** (Microsoft Edge TTS). Er zijn twee stemmen om uit te kiezen in de ouder-instellingen: een meisjesstem (`nl-NL-FennaNeural`, standaard) en een jongensstem (`nl-NL-MaartenNeural`). Elke stem heeft een eigen map onder `audio/<stem>/` met een eigen `manifest.json`; `audio/voices.json` houdt bij welke stemmen er zijn. Dit klinkt veel natuurlijker dan een toestel-stem en draait volledig offline en zonder tracking.
 - **Terugval:** voor zinnen zonder opname (of als de ouder dat kiest) valt de app automatisch terug op de **Web Speech API** (SpeechSynthesis, `nl-NL`). Die wacht op het laden van de stemmen, knipt lange zinnen in stukjes en ontgrendelt het geluid na de eerste tik (nodig voor iOS Safari).
 - **PWA**: `manifest.json` en een service worker (`sw.js`) die de app-bestanden cachet voor offline gebruik.
