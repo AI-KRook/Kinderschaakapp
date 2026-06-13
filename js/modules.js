@@ -218,10 +218,48 @@
     L.board.move("d1", "d8");
     await L.wait(700);
     await L.say("Wordt een koning aangevallen? Dan heet dat schaak. De koning moet dan snel veilig worden.");
+
+    // de drie manieren, nu ook echt voorgedaan op het bord.
+    // zelfde stand (zwarte koning staat schaak van de witte toren), drie oplossingen:
+    // weglopen (Ke8-f8), blokkeren (Ta4-e4) of slaan (Lh4xe1). Vooraf in chess.js gecontroleerd.
+    function checkBase() {
+      L.board.setupCustom([
+        { type: "k", color: "b", square: "e8" },
+        { type: "r", color: "b", square: "a4" },
+        { type: "b", color: "b", square: "h4" },
+        { type: "r", color: "w", square: "e1" }
+      ], "b");
+      L.board.setMode("locked");
+      L.board.showHintFrom("e1"); // de aanvaller licht op
+    }
+
     await L.say("Sta je schaak? Dan kan je drie dingen doen om je koning te redden.");
+
+    checkBase();
+    L.point("e8");
     await L.say("Eén: loop met je koning weg, naar een veilig vakje.");
+    L.unpoint();
+    await L.wait(250);
+    L.board.move("e8", "f8");
+    await L.wait(1100);
+
+    checkBase();
+    L.point("e4");
     await L.say("Twee: zet een ander stuk ervoor, als een schildje.");
+    L.unpoint();
+    await L.wait(250);
+    L.board.move("a4", "e4");
+    await L.wait(1100);
+
+    checkBase();
+    L.point("e1");
     await L.say("Drie: sla het stuk dat jouw koning aanvalt.");
+    L.unpoint();
+    await L.wait(250);
+    L.board.move("h4", "e1");
+    await L.wait(1100);
+
+    L.board.clearHighlights();
     await L.say("En kan de koning helemaal niet meer ontsnappen? Dan is het schaakmat. Het spel is uit!", { mood: "happy" });
   }
 
