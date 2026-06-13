@@ -587,15 +587,38 @@
       pieces: [{ type: "k", color: "b", square: "h8" }, { type: "k", color: "w", square: "g6" },
                { type: "q", color: "w", square: "a7" }],
       zeg: "De laatste! Zet je dame vlak naast de koning. Jouw koning past op haar.",
-      hint: "Een tipje: zet je dame naast de zwarte koning, op de bovenste rij." }
+      hint: "Een tipje: zet je dame naast de zwarte koning, op de bovenste rij." },
+    // 7. penning: het gepende paard pakken (het mag niet weg)
+    { type: "capture", only: "d4", point: "e5", target: "e5",
+      pieces: [{ type: "k", color: "b", square: "e8" }, { type: "n", color: "b", square: "e5" },
+               { type: "r", color: "w", square: "e1" }, { type: "p", color: "w", square: "d4" },
+               { type: "k", color: "w", square: "h1" }],
+      zeg: "Het zwarte paard zit vast voor de koning, het mag niet weg. Pak het met je pion!",
+      hint: "Tik op je pion en sla het paard schuin.",
+      gelukt: "Knap! Het paard zat vast en jij pakte het." },
+    // 8. aftrekschaak: paard weg, de toren erachter geeft schaak, en pak de dame
+    { type: "capture", only: "e4", point: "c5", target: "c5",
+      pieces: [{ type: "k", color: "b", square: "e8" }, { type: "q", color: "b", square: "c5" },
+               { type: "r", color: "w", square: "e1" }, { type: "n", color: "w", square: "e4" },
+               { type: "k", color: "w", square: "h1" }],
+      zeg: "Een toverzet! Haal je paard weg, en de toren erachter geeft schaak. Pak meteen de dame!",
+      hint: "Zet je paard op de dame. Dan geeft de toren erachter schaak.",
+      gelukt: "Aftrekschaak! De toren geeft schaak en jij wint de dame. Super slim!" },
+    // 9. spies: koning voor, dame erachter
+    { type: "skewer", only: "h1", point: "a1", target: "a1",
+      pieces: [{ type: "k", color: "b", square: "a4" }, { type: "q", color: "b", square: "a7" },
+               { type: "r", color: "w", square: "h1" }, { type: "k", color: "w", square: "h8" }],
+      zeg: "Een spies! Val de koning aan met je toren. Hij moet opzij, en dan pak jij de dame erachter.",
+      hint: "Zet je toren op het paarse vakje, onder de koning.",
+      gelukt: "Een spies! Eerst de koning, dan de dame. Wat ben jij slim!" }
   ];
 
   function setupPuzzle(L, def) {
     L.board.setupCustom(def.pieces, "w");
     L.board.setMode("move");
     L.board.setMovable(function (sq) { return sq === def.only; }); // alleen het juiste stuk
-    // doelvakje (leeg) laten oplichten bij vork en promotie
-    if (def.type === "fork" || def.type === "promo") L.board.showHintFrom(def.point);
+    // leeg doelvakje laten oplichten waar het kind naartoe moet
+    if (def.type === "fork" || def.type === "promo" || def.type === "skewer") L.board.showHintFrom(def.point);
     L.point(def.point);
   }
 
@@ -608,12 +631,13 @@
       var ok = (def.type === "mate") ? L.board.inCheckmate()
              : (def.type === "capture") ? (!!mv.captured && mv.to === def.target)
              : (def.type === "promo") ? (!!mv.flags && mv.flags.indexOf("p") >= 0)
-             : (mv.to === def.target); // fork (alleen het juiste stuk is beweegbaar)
+             : (mv.to === def.target); // fork en skewer: het juiste vakje bereiken
       if (ok) {
         L.unpoint();
         L.cheer();
         L.star();
-        var msg = (def.type === "fork") ? "Een vork! Allebei tegelijk! Wat ben jij slim."
+        var msg = def.gelukt ? def.gelukt
+                : (def.type === "fork") ? "Een vork! Allebei tegelijk! Wat ben jij slim."
                 : (def.type === "mate") ? "Schaakmat! Je hebt het voor elkaar! Hoeraaa!"
                 : (def.type === "promo") ? "Joepie! Je pion is een dame geworden!"
                 : pick(SLAGEN);
@@ -637,6 +661,10 @@
     await L.say("Nu de vork! Eén stuk dat er twee tegelijk aanvalt. Heel slim.");
     await puzzleSolve(L, PUZZLES[2]); await L.wait(300); // paard-vork
     await puzzleSolve(L, PUZZLES[3]); await L.wait(300); // pion-vork
+    await L.say("Nu wat moeilijkere trucs! Goed opletten.");
+    await puzzleSolve(L, PUZZLES[6]); await L.wait(300); // penning
+    await puzzleSolve(L, PUZZLES[7]); await L.wait(300); // aftrekschaak
+    await puzzleSolve(L, PUZZLES[8]); await L.wait(300); // spies
     await L.say("En nu het mooiste: zet mat in één!");
     await puzzleSolve(L, PUZZLES[4]); await L.wait(300); // toren-mat
     await puzzleSolve(L, PUZZLES[5]); await L.wait(300); // dame-mat
