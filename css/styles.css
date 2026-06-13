@@ -223,14 +223,18 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
   content: "⭐"; position: absolute; top: -12px; right: -8px; font-size: 30px;
   filter: drop-shadow(0 2px 3px rgba(0,0,0,.2));
 }
-/* kleuraccenten per kaart */
+/* kleuraccenten per leskaart (de 2x2 bovenaan) */
 .menu-card:nth-child(1) .card-emoji { background: #d9f0ff; }
 .menu-card:nth-child(2) .card-emoji { background: #ffe6cc; }
 .menu-card:nth-child(3) .card-emoji { background: #ffd9d2; }
 .menu-card:nth-child(4) .card-emoji { background: #e7dcff; }
-.menu-card:nth-child(5) .card-emoji { background: #d6f5e3; }
-.menu-card.play-card { grid-column: span 2; flex-direction: row; justify-content: center; gap: 16px; background: linear-gradient(180deg,#fff,#fff6e6); }
-.menu-card.play-card .card-emoji { width: 72px; height: 72px; }
+/* brede, uitgelichte kaarten (puzzels + partijtje) op een eigen rij */
+.menu-card.wide { grid-column: span 2; flex-direction: row; justify-content: center; gap: 16px; }
+.menu-card.wide .card-emoji { width: 72px; height: 72px; }
+.menu-card.puzzle-card { background: linear-gradient(180deg,#fff,#fff3d6); }
+.menu-card.puzzle-card .card-emoji { background: #fff0c2; }
+.menu-card.play-card { background: linear-gradient(180deg,#fff,#fff6e6); }
+.menu-card.play-card .card-emoji { background: #d6f5e3; }
 
 /* =================================================================
    LES / BORD

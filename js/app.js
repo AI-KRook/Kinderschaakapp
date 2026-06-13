@@ -52,7 +52,9 @@
     Modules.list.forEach(function (mod, i) {
       var card = document.createElement("button");
       card.type = "button";
-      card.className = "menu-card" + (mod.id === "play" ? " play-card" : "");
+      card.className = "menu-card"
+        + (mod.id === "play" ? " wide play-card" : "")
+        + (mod.id === "puzzles" ? " wide puzzle-card" : "");
       if (App.progress[mod.id]) card.classList.add("done");
       card.innerHTML =
         '<span class="card-num">' + (i + 1) + '</span>' +
