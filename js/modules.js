@@ -498,46 +498,55 @@
   }
 
   /* ============================ MODULE: PUZZELS (TACTIEK) ============================ */
-  // Korte één-zet-puzzels. Alle standen vooraf in chess.js gecontroleerd.
+  // Korte één-zet-puzzels met zes verschillende motieven. Alle standen vooraf
+  // in chess.js gecontroleerd. Types: capture, promo, fork, mate.
   var PUZZLES = [
-    { type: "capture", only: "d1", point: "d7", target: "d7",
-      pieces: [{ type: "k", color: "w", square: "e1" }, { type: "r", color: "w", square: "d1" },
-               { type: "k", color: "b", square: "a8" }, { type: "q", color: "b", square: "d7" }],
-      zeg: "Pak het zwarte stuk dat gratis staat. Niemand verdedigt het!",
-      hint: "Tik op je toren en pak het stuk dat oplicht." },
-    { type: "capture", only: "f1", point: "h3", target: "h3",
-      pieces: [{ type: "k", color: "w", square: "a1" }, { type: "b", color: "w", square: "f1" },
-               { type: "k", color: "b", square: "a8" }, { type: "n", color: "b", square: "h3" }],
-      zeg: "Pak het zwarte stuk dat gratis staat. Niemand verdedigt het!",
-      hint: "Tik op je loper en sla het stuk schuin." },
+    // 1. de dame winnen (gratis stuk)
+    { type: "capture", only: "d1", point: "d6", target: "d6",
+      pieces: [{ type: "k", color: "w", square: "g1" }, { type: "r", color: "w", square: "d1" },
+               { type: "k", color: "b", square: "h8" }, { type: "q", color: "b", square: "d6" }],
+      zeg: "Pak de zwarte dame! Ze staat helemaal alleen, niemand verdedigt haar.",
+      hint: "Tik op je toren en pak de dame die oplicht." },
+    // 2. een pion promoveren
+    { type: "promo", only: "b7", point: "b8",
+      pieces: [{ type: "k", color: "w", square: "h1" }, { type: "p", color: "w", square: "b7" },
+               { type: "k", color: "b", square: "e4" }],
+      zeg: "Breng je pion naar de overkant. Dan wordt hij een dame!",
+      hint: "Tik op je pion en zet hem helemaal naar boven." },
+    // 3. vork met het paard (koning + dame)
     { type: "fork", only: "b5", point: "c7", target: "c7",
       pieces: [{ type: "k", color: "w", square: "h1" }, { type: "n", color: "w", square: "b5" },
                { type: "k", color: "b", square: "a8" }, { type: "q", color: "b", square: "e8" }],
-      zeg: "Nu een vork! Zet je paard op het vakje dat oplicht. Dan val je er twee tegelijk aan.",
-      hint: "Zet je paard op het paarse vakje. Het valt de koning en de dame tegelijk aan." },
-    { type: "fork", only: "g5", point: "f7", target: "f7",
-      pieces: [{ type: "k", color: "w", square: "a1" }, { type: "n", color: "w", square: "g5" },
-               { type: "k", color: "b", square: "h8" }, { type: "q", color: "b", square: "d8" }],
-      zeg: "Nog een vork! Zet je paard weer op het vakje dat oplicht.",
-      hint: "Zet je paard op het paarse vakje. Het valt de koning en de dame tegelijk aan." },
+      zeg: "Zet je paard op het vakje dat oplicht. Dan val je de koning en de dame samen aan!",
+      hint: "Zet je paard op het paarse vakje." },
+    // 4. vork met een pion (twee paarden)
+    { type: "fork", only: "e4", point: "e5", target: "e5",
+      pieces: [{ type: "k", color: "w", square: "e1" }, { type: "p", color: "w", square: "e4" },
+               { type: "k", color: "b", square: "h8" }, { type: "n", color: "b", square: "d6" },
+               { type: "n", color: "b", square: "f6" }],
+      zeg: "Ook een pion kan vorken! Zet je pion vooruit, op het vakje dat oplicht. Hij valt dan twee paarden tegelijk aan.",
+      hint: "Zet je pion een stapje vooruit, op het paarse vakje." },
+    // 5. mat met de toren (achterste rij)
     { type: "mate", only: "a1", point: "a8",
       pieces: [{ type: "k", color: "b", square: "g8" }, { type: "p", color: "b", square: "f7" },
                { type: "p", color: "b", square: "g7" }, { type: "p", color: "b", square: "h7" },
                { type: "r", color: "w", square: "a1" }, { type: "k", color: "w", square: "e1" }],
-      zeg: "En nu mat in één! Zet de zwarte koning schaakmat.",
+      zeg: "Zet de zwarte koning schaakmat! Schuif je toren naar boven, vlak naast de koning.",
       hint: "Een tipje: schuif je toren helemaal naar boven, naast de koning." },
-    { type: "mate", only: "a1", point: "a7",
-      pieces: [{ type: "k", color: "b", square: "a8" }, { type: "k", color: "w", square: "b6" },
-               { type: "q", color: "w", square: "a1" }],
-      zeg: "De laatste! Zet weer mat in één. Je dame staat al klaar.",
-      hint: "Een tipje: zet je dame vlak naast de zwarte koning." }
+    // 6. mat met de dame (naast de koning, gedekt door de eigen koning)
+    { type: "mate", only: "a7", point: "h7",
+      pieces: [{ type: "k", color: "b", square: "h8" }, { type: "k", color: "w", square: "g6" },
+               { type: "q", color: "w", square: "a7" }],
+      zeg: "De laatste! Zet je dame vlak naast de koning. Jouw koning past op haar.",
+      hint: "Een tipje: zet je dame naast de zwarte koning, op de bovenste rij." }
   ];
 
   function setupPuzzle(L, def) {
     L.board.setupCustom(def.pieces, "w");
     L.board.setMode("move");
     L.board.setMovable(function (sq) { return sq === def.only; }); // alleen het juiste stuk
-    if (def.type === "fork") L.board.showHintFrom(def.point);       // doelvakje licht paars op
+    // doelvakje (leeg) laten oplichten bij vork en promotie
+    if (def.type === "fork" || def.type === "promo") L.board.showHintFrom(def.point);
     L.point(def.point);
   }
 
@@ -549,13 +558,15 @@
       var mv = await L.waitMove();
       var ok = (def.type === "mate") ? L.board.inCheckmate()
              : (def.type === "capture") ? (!!mv.captured && mv.to === def.target)
-             : (mv.piece === "n" && mv.to === def.target); // fork
+             : (def.type === "promo") ? (!!mv.flags && mv.flags.indexOf("p") >= 0)
+             : (mv.to === def.target); // fork (alleen het juiste stuk is beweegbaar)
       if (ok) {
         L.unpoint();
         L.cheer();
         L.star();
         var msg = (def.type === "fork") ? "Een vork! Allebei tegelijk! Wat ben jij slim."
                 : (def.type === "mate") ? "Schaakmat! Je hebt het voor elkaar! Hoeraaa!"
+                : (def.type === "promo") ? "Joepie! Je pion is een dame geworden!"
                 : pick(SLAGEN);
         await L.say(msg, { mood: "happy" });
         return;
@@ -572,14 +583,14 @@
 
   async function modulePuzzles(L) {
     await L.say("Welkom bij de puzzels! Hier word jij een echte schaakbaas. Klaar?", { mood: "happy" });
-    await puzzleSolve(L, PUZZLES[0]); await L.wait(300);
-    await puzzleSolve(L, PUZZLES[1]); await L.wait(300);
+    await puzzleSolve(L, PUZZLES[0]); await L.wait(300); // dame winnen
+    await puzzleSolve(L, PUZZLES[1]); await L.wait(300); // promotie
     await L.say("Nu de vork! Eén stuk dat er twee tegelijk aanvalt. Heel slim.");
-    await puzzleSolve(L, PUZZLES[2]); await L.wait(300);
-    await puzzleSolve(L, PUZZLES[3]); await L.wait(300);
+    await puzzleSolve(L, PUZZLES[2]); await L.wait(300); // paard-vork
+    await puzzleSolve(L, PUZZLES[3]); await L.wait(300); // pion-vork
     await L.say("En nu het mooiste: zet mat in één!");
-    await puzzleSolve(L, PUZZLES[4]); await L.wait(300);
-    await puzzleSolve(L, PUZZLES[5]); await L.wait(300);
+    await puzzleSolve(L, PUZZLES[4]); await L.wait(300); // toren-mat
+    await puzzleSolve(L, PUZZLES[5]); await L.wait(300); // dame-mat
     L.board.clearGoals();
     L.celebrate();
     await L.say("Wauw! Jij bent een echte puzzelkampioen. Knap hoor!", { mood: "happy" });
