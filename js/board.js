@@ -59,6 +59,11 @@
     this.pointerEl.textContent = "👇"; // 👇
     el.appendChild(this.pointerEl);
 
+    // keuzemenu voor pion-promotie (welk stuk wordt de pion?)
+    this.promoEl = document.createElement("div");
+    this.promoEl.className = "promo-chooser hidden";
+    el.appendChild(this.promoEl);
+
     this._bindPointer();
 
     // stukken, ster en wijzer schalen mee met de werkelijke vakjesgrootte
@@ -335,6 +340,7 @@
     // tikt het kind tijdens een uitleg? dan die uitleg meteen afmaken (doorgaan),
     // en de tik niet als zet behandelen.
     if (window.Speech && Speech.isBlocking()) { e.preventDefault(); Speech.skip(); return; }
+    if (this._awaitingPromo) { e.preventDefault(); return; } // wacht op promotiekeuze
     if (this.mode === "locked") return;
     var sq = this._squareFromPoint(e.clientX, e.clientY);
     if (!sq) return;
@@ -413,8 +419,22 @@
   };
 
   /* ---------- een zet uitvoeren + animeren ---------- */
+  // is dit een pion die promoveert (naar de overkant gaat)?
+  Board.prototype._isPromotion = function (from, to) {
+    var p = this.game.get(from);
+    if (!p || p.type !== "p") return false;
+    var r = to[1];
+    return (p.color === "w" && r === "8") || (p.color === "b" && r === "1");
+  };
+
   Board.prototype._performMove = function (from, to, byUser) {
-    var move = this.game.move({ from: from, to: to, promotion: "q" });
+    // bij een zet van het kind dat promoveert: eerst laten kiezen welk stuk
+    if (byUser && this._isPromotion(from, to)) { this._askPromotion(from, to, byUser); return null; }
+    return this._commitMove(from, to, byUser, "q");
+  };
+
+  Board.prototype._commitMove = function (from, to, byUser, promotion) {
+    var move = this.game.move({ from: from, to: to, promotion: promotion || "q" });
     if (!move) { this.clearSelection(); return null; }
     this.clearSelection();
     this._animateMove(move);
@@ -428,6 +448,38 @@
     if (byUser && typeof this.onUserMove === "function") this.onUserMove(move);
     this._resolveWaiters(byUser ? "usermove" : "move", move);
     return move;
+  };
+
+  // keuzemenu tonen: dame, toren, loper of paard
+  Board.prototype._askPromotion = function (from, to, byUser) {
+    var self = this;
+    this._awaitingPromo = true;
+    this.clearSelection();
+    // de pion alvast op het promotieveld tonen
+    var el = this.pieceEls[from];
+    if (el) el.style.transform = this._transformFor(to);
+    var color = (this.game.get(from) || {}).color || this.game.turn();
+    var colorClass = color === "w" ? "white" : "black";
+    this.promoEl.innerHTML = "";
+    var row = document.createElement("div");
+    row.className = "promo-row";
+    ["q", "r", "b", "n"].forEach(function (t) {
+      var b = document.createElement("button");
+      b.type = "button";
+      b.className = "promo-btn " + colorClass;
+      b.innerHTML = '<span class="piece-glyph">' + GLYPH[t] + '</span>';
+      b.addEventListener("click", function (ev) {
+        ev.stopPropagation();
+        if (!self._awaitingPromo) return;
+        self._awaitingPromo = false;
+        self.promoEl.classList.add("hidden");
+        self._commitMove(from, to, byUser, t);
+      });
+      row.appendChild(b);
+    });
+    this.promoEl.appendChild(row);
+    this.promoEl.classList.remove("hidden");
+    if (window.Speech) Speech.speak("Je pion is aan de overkant! Kies welk stuk hij wordt.", { remember: false });
   };
 
   // programmatische zet (bv. de computer)
@@ -480,6 +532,8 @@
   /* ---------- toestand opvragen ---------- */
   Board.prototype.inCheck = function () { return this.game.in_check(); };
   Board.prototype.inCheckmate = function () { return this.game.in_checkmate(); };
+  Board.prototype.inStalemate = function () { return this.game.in_stalemate(); };
+  Board.prototype.isDraw = function () { return this.game.in_draw(); };
   Board.prototype.isGameOver = function () { return this.game.game_over(); };
   Board.prototype.moves = function (opts) { return this.game.moves(opts); };
 

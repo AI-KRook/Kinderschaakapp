@@ -261,6 +261,7 @@
 
     L.board.clearHighlights();
     await L.say("En kan de koning helemaal niet meer ontsnappen? Dan is het schaakmat. Het spel is uit!", { mood: "happy" });
+    await L.say("En soms kan niemand winnen. Dan is het gelijkspel, niemand verliest.");
   }
 
   // het kind geeft zelf schaak (nog geen mat)
@@ -534,6 +535,10 @@
       msg = (L.board.turn() === bot) // de partij die mat staat, is aan zet
         ? "Schaakmat! Jij hebt gewonnen! Wat ben jij een kampioen!"
         : "Oei, ik had even mazzel! Maar wat speelde jij goed, zeg.";
+    } else if (L.board.inStalemate()) {
+      msg = "Patstelling! De koning kan niet meer, maar staat niet schaak. Het is gelijkspel.";
+    } else if (L.board.isDraw()) {
+      msg = "Het is gelijkspel! Niemand wint. Knap gespeeld, hoor!";
     } else {
       msg = "Wat een leuk partijtje! Jij bent een echte schaker aan het worden.";
     }

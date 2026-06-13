@@ -104,6 +104,7 @@ PHRASES = [
     "Een tipje: schuif je dame naar boven, naar het rijtje van de koning.",
     "Schaakmat! Je hebt het voor elkaar! Hoeraaa!",
     "Wauw! Je weet nu wat schaak is, en schaakmat, en je kan zelfs rokeren. Wat ben jij knap!",
+    "En soms kan niemand winnen. Dan is het gelijkspel, niemand verliest.",
     # module: puzzels (tactiek) - zes verschillende motieven
     "Welkom bij de puzzels! Hier word jij een echte schaakbaas. Klaar?",
     "Pak de zwarte dame! Ze staat helemaal alleen, niemand verdedigt haar.",
@@ -136,6 +137,9 @@ PHRASES = [
     "Schaakmat! Jij hebt gewonnen! Wat ben jij een kampioen!",
     "Oei, ik had even mazzel! Maar wat speelde jij goed, zeg.",
     "Wat een leuk partijtje! Jij bent een echte schaker aan het worden.",
+    "Patstelling! De koning kan niet meer, maar staat niet schaak. Het is gelijkspel.",
+    "Het is gelijkspel! Niemand wint. Knap gespeeld, hoor!",
+    "Je pion is aan de overkant! Kies welk stuk hij wordt.",
     # app: menu, einde, instellingen
     "Hoi! Ik ben Hinnik, het schaakpaardje. Wat leuk dat je er bent! Kies maar een plaatje. Dan gaan we samen schaken leren.",
     "Wat wil je nu doen? Kies maar een plaatje!",

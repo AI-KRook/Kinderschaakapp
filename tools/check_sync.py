@@ -12,7 +12,7 @@ def read(name):
     with open(os.path.join(HERE, "..", "js", name), encoding="utf-8") as f:
         return f.read()
 
-src = read("modules.js") + "\n" + read("app.js")
+src = read("modules.js") + "\n" + read("app.js") + "\n" + read("board.js")
 
 # alle dubbele-aanhalingstekst-strings
 strings = re.findall(r'"((?:[^"\\]|\\.)*)"', src)

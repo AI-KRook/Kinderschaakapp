@@ -3,7 +3,7 @@
    Cachet alle app-bestanden bij de installatie en serveert ze daarna
    uit de cache (cache-first). Verhoog CACHE bij elke nieuwe versie.
    ================================================================= */
-var CACHE = "hinnik-schaak-v18";
+var CACHE = "hinnik-schaak-v19";
 
 var ASSETS = [
   "./",
