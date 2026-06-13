@@ -3,7 +3,7 @@
    Cachet alle app-bestanden bij de installatie en serveert ze daarna
    uit de cache (cache-first). Verhoog CACHE bij elke nieuwe versie.
    ================================================================= */
-var CACHE = "hinnik-schaak-v1";
+var CACHE = "hinnik-schaak-v2";
 
 var ASSETS = [
   "./",
@@ -20,16 +20,23 @@ var ASSETS = [
   "icons/icon-192.png",
   "icons/icon-512.png",
   "icons/icon-512-maskable.png",
-  "icons/apple-touch-icon.png"
+  "icons/apple-touch-icon.png",
+  "audio/manifest.json",
+  "audio/_silent.wav"
 ];
 
 self.addEventListener("install", function (e) {
   e.waitUntil(
     caches.open(CACHE).then(function (cache) {
-      // voeg toe, maar laat de installatie niet falen als één icoon mist
       return Promise.all(ASSETS.map(function (url) {
         return cache.add(url).catch(function () {});
-      }));
+      })).then(function () {
+        // alle opgenomen mp3's uit het manifest meecachen (offline gebruik)
+        return fetch("audio/manifest.json").then(function (r) { return r.json(); }).then(function (map) {
+          var files = Object.keys(map).map(function (k) { return "audio/" + map[k]; });
+          return Promise.all(files.map(function (u) { return cache.add(u).catch(function () {}); }));
+        }).catch(function () {});
+      });
     }).then(function () { return self.skipWaiting(); })
   );
 });

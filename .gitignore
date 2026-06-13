@@ -3,6 +3,9 @@
 __pycache__/
 *.pyc
 
+# losse stem-voorbeelden (alleen voor het kiezen van een stem)
+stem-voorbeelden/
+
 # OS
 .DS_Store
 Thumbs.db

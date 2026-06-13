@@ -6,7 +6,7 @@
   "use strict";
 
   var App = {
-    settings: { sound: true, rate: 0.9, difficulty: 1, voiceURI: null },
+    settings: { sound: true, recorded: true, rate: 1.0, difficulty: 1, voiceURI: null },
     progress: {},
     _runToken: 0,
     _run: null
@@ -201,6 +201,7 @@
   function openSettings() {
     populateVoices();
     $("set-rate").value = App.settings.rate;
+    $("set-recorded").setAttribute("aria-pressed", String(App.settings.recorded !== false));
     refreshSoundUI();
     refreshDifficultyUI();
     $("settings").classList.add("is-open");
@@ -288,6 +289,13 @@
     $("set-close").addEventListener("click", closeSettings);
     $("settings").addEventListener("click", function (e) { if (e.target === $("settings")) closeSettings(); });
     $("set-sound").addEventListener("click", function () { setSound(!App.settings.sound); });
+    $("set-recorded").addEventListener("click", function () {
+      App.settings.recorded = !App.settings.recorded;
+      Speech.setUseRecorded(App.settings.recorded);
+      $("set-recorded").setAttribute("aria-pressed", String(App.settings.recorded));
+      saveSettings();
+      Speech.speak(App.settings.recorded ? "Hoi! Ik ben Hinnik het paardje. Zullen we samen leren schaken?" : "Zo klinkt de stem van het toestel.", { remember: false });
+    });
     $("set-rate").addEventListener("input", function () { App.settings.rate = Number(this.value); Speech.setRate(App.settings.rate); });
     $("set-rate").addEventListener("change", function () { saveSettings(); Speech.speak("Zo klink ik nu.", { remember: false }); });
     $("set-difficulty").addEventListener("click", function (e) {
@@ -343,6 +351,7 @@
 
     Speech.init();
     Speech.setEnabled(App.settings.sound);
+    Speech.setUseRecorded(App.settings.recorded !== false);
     Speech.setRate(App.settings.rate);
     if (App.settings.voiceURI) Speech.setVoiceURI(App.settings.voiceURI);
 

@@ -68,8 +68,22 @@ De makkelijkste manier is via **GitHub Pages**, want dan krijg je een `https`-ad
 
 - **Vanilla JavaScript**, geen framework, geen bouwstap.
 - **chess.js** (`vendor/chess.js`) voor alle schaakregels: legale zetten, schaak en mat.
-- **Web Speech API** (SpeechSynthesis) voor de Nederlandse stem (`nl-NL`). De app wacht op het laden van de stemmen, knipt lange zinnen in korte stukjes en ontgrendelt het geluid na de eerste tik (allemaal nodig voor iOS Safari).
+- **Stem:** Hinnik praat met een **vooraf opgenomen neurale stem** (Microsoft Edge TTS, stem `nl-NL-FennaNeural`, iets langzamer en hoger voor kinderen). Alle vaste zinnen staan als mp3 in `audio/`, met `audio/manifest.json` als index. Dit klinkt veel natuurlijker dan een toestel-stem en draait volledig offline en zonder tracking.
+- **Terugval:** voor zinnen zonder opname (of als de ouder dat kiest) valt de app automatisch terug op de **Web Speech API** (SpeechSynthesis, `nl-NL`). Die wacht op het laden van de stemmen, knipt lange zinnen in stukjes en ontgrendelt het geluid na de eerste tik (nodig voor iOS Safari).
 - **PWA**: `manifest.json` en een service worker (`sw.js`) die de app-bestanden cachet voor offline gebruik.
+
+### De stem opnieuw opnemen of veranderen
+
+De gesproken zinnen worden gemaakt met een klein Python-scriptje:
+
+```bash
+pip install edge-tts
+python tools/make_voice.py
+```
+
+Dit genereert alle mp3-bestanden in `audio/` plus `audio/manifest.json`. Wil je een andere stem? Pas bovenin `tools/make_voice.py` de regels `VOICE`, `RATE` en `PITCH` aan. Beschikbare Nederlandse stemmen: `nl-NL-FennaNeural`, `nl-NL-ColetteNeural`, `nl-NL-MaartenNeural` (en de Vlaamse `nl-BE-DenaNeural`, `nl-BE-ArnaudNeural`). Lijst opvragen met `edge-tts --list-voices`.
+
+Voeg je nieuwe gesproken zinnen toe aan de app? Zet de exacte tekst ook in de lijst `PHRASES` in `tools/make_voice.py` en draai het script opnieuw. Zinnen die nog geen opname hebben, worden automatisch door de toestel-stem uitgesproken.
 
 ### App-iconen opnieuw maken
 
