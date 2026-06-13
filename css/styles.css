@@ -290,17 +290,21 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 }
 @keyframes blink { 0%,100%{opacity:.25;} 50%{opacity:.8;} }
 
-/* doel-ster / muntje voor oefeningen */
+/* doel-ster / muntje voor oefeningen, gecentreerd in het vakje */
 .cell .goal {
-  position: absolute; font-size: 60%; line-height: 1;
+  position: absolute; left: 50%; top: 50%;
+  font-size: calc(var(--cell, 44px) * 0.5); line-height: 1;
   filter: drop-shadow(0 2px 2px rgba(0,0,0,.25));
-  animation: bob 1.2s ease-in-out infinite; pointer-events: none; z-index: 1;
+  animation: bob 1.2s ease-in-out infinite; pointer-events: none; z-index: 5;
 }
-@keyframes bob { 0%,100%{ transform: translateY(0) rotate(-6deg);} 50%{ transform: translateY(-12%) rotate(6deg);} }
+@keyframes bob {
+  0%,100% { transform: translate(-50%, -50%) rotate(-6deg); }
+  50%     { transform: translate(-50%, -60%) rotate(6deg); }
+}
 
 /* wijzende hand-hint */
 .board-pointer {
-  position: absolute; z-index: 6; font-size: 9%; pointer-events: none;
+  position: absolute; z-index: 6; font-size: calc(var(--cell, 44px) * 0.66); pointer-events: none;
   transform: translate(-50%, -120%);
   animation: pointBounce .8s ease-in-out infinite;
   filter: drop-shadow(0 3px 4px rgba(0,0,0,.3));
@@ -319,11 +323,11 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 }
 .piece-glyph {
   font-family: "Apple Symbols", "Segoe UI Symbol", "Noto Sans Symbols 2", "Noto Sans Symbols", serif;
-  font-size: 72px;
+  /* schaalt mee met de werkelijke vakjesgrootte (--cell wordt door board.js gezet) */
+  font-size: calc(var(--cell, 44px) * 0.74);
   line-height: 1;
   paint-order: stroke fill;
 }
-@media (max-width: 480px) { .piece-glyph { font-size: 11.5vw; } }
 .piece.white .piece-glyph { color: #fdf3df; -webkit-text-stroke: 1.6px #4a382b; text-shadow: 0 3px 4px rgba(0,0,0,.28); }
 .piece.black .piece-glyph { color: #43342a; -webkit-text-stroke: 1.4px #1d130c; text-shadow: 0 2px 3px rgba(0,0,0,.22); }
 .piece.lift { z-index: 9; }

@@ -3,7 +3,7 @@
    Cachet alle app-bestanden bij de installatie en serveert ze daarna
    uit de cache (cache-first). Verhoog CACHE bij elke nieuwe versie.
    ================================================================= */
-var CACHE = "hinnik-schaak-v2";
+var CACHE = "hinnik-schaak-v3";
 
 var ASSETS = [
   "./",
@@ -21,7 +21,7 @@ var ASSETS = [
   "icons/icon-512.png",
   "icons/icon-512-maskable.png",
   "icons/apple-touch-icon.png",
-  "audio/manifest.json",
+  "audio/voices.json",
   "audio/_silent.wav"
 ];
 
@@ -31,10 +31,15 @@ self.addEventListener("install", function (e) {
       return Promise.all(ASSETS.map(function (url) {
         return cache.add(url).catch(function () {});
       })).then(function () {
-        // alle opgenomen mp3's uit het manifest meecachen (offline gebruik)
-        return fetch("audio/manifest.json").then(function (r) { return r.json(); }).then(function (map) {
-          var files = Object.keys(map).map(function (k) { return "audio/" + map[k]; });
-          return Promise.all(files.map(function (u) { return cache.add(u).catch(function () {}); }));
+        // alle opgenomen mp3's van elke stem meecachen (offline gebruik)
+        return fetch("audio/voices.json").then(function (r) { return r.json(); }).then(function (voices) {
+          return Promise.all((voices || []).map(function (v) {
+            var dir = "audio/" + v.dir + "/";
+            return fetch(dir + "manifest.json").then(function (r) { return r.json(); }).then(function (map) {
+              var files = [dir + "manifest.json"].concat(Object.keys(map).map(function (k) { return dir + map[k]; }));
+              return Promise.all(files.map(function (u) { return cache.add(u).catch(function () {}); }));
+            }).catch(function () {});
+          }));
         }).catch(function () {});
       });
     }).then(function () { return self.skipWaiting(); })

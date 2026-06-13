@@ -57,6 +57,23 @@
     el.appendChild(this.pointerEl);
 
     this._bindPointer();
+
+    // stukken, ster en wijzer schalen mee met de werkelijke vakjesgrootte
+    this._updateCellSize();
+    var self = this;
+    if (window.ResizeObserver) {
+      this._ro = new ResizeObserver(function () { self._updateCellSize(); });
+      this._ro.observe(el);
+    }
+    window.addEventListener("resize", function () { self._updateCellSize(); });
+    // ook nadat de lay-out is uitgerekend
+    setTimeout(function () { self._updateCellSize(); }, 60);
+  };
+
+  Board.prototype._updateCellSize = function () {
+    if (!this.el) return;
+    var w = this.el.clientWidth || this.el.getBoundingClientRect().width;
+    if (w > 0) this.el.style.setProperty("--cell", (w / 8) + "px");
   };
 
   /* ---------- stand zetten ---------- */

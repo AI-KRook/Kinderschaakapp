@@ -40,7 +40,9 @@
     voice: null,
     voiceURI: null,
     voices: [],
-    audioMap: null,     // { genormaliseerde tekst: bestandsnaam }
+    voicePack: "fenna",   // gekozen opgenomen stem
+    voicePacks: [],       // beschikbare opgenomen stemmen (uit voices.json)
+    audioMap: null,       // { genormaliseerde tekst: bestandsnaam }
     unlocked: false,
     speaking: false,
     lastMessage: "",
@@ -48,19 +50,42 @@
     token: 0
   };
 
-  var listeners = { start: [], end: [], voices: [], text: [] };
+  var listeners = { start: [], end: [], voices: [], text: [], voicepacks: [] };
   function emit(name, arg) { listeners[name].forEach(function (fn) { try { fn(arg); } catch (e) {} }); }
 
   function norm(s) { return String(s).replace(/\s+/g, " ").trim().toLowerCase(); }
 
-  /* ---------- opgenomen stem laden ---------- */
+  /* ---------- opgenomen stemmen laden ---------- */
+  function packDir() { return AUDIO_BASE + state.voicePack + "/"; }
+
+  function loadVoices() {
+    fetch(AUDIO_BASE + "voices.json").then(function (r) {
+      return r.ok ? r.json() : null;
+    }).then(function (list) {
+      if (Array.isArray(list) && list.length) {
+        state.voicePacks = list;
+        if (!list.some(function (v) { return v.id === state.voicePack; })) state.voicePack = list[0].id;
+      }
+      emit("voicepacks");
+      loadManifest();
+    }).catch(function () { loadManifest(); });
+  }
+
   function loadManifest() {
-    fetch(AUDIO_BASE + "manifest.json").then(function (r) {
+    state.audioMap = null;
+    fetch(packDir() + "manifest.json").then(function (r) {
       return r.ok ? r.json() : null;
     }).then(function (map) {
       if (map && typeof map === "object") state.audioMap = map;
     }).catch(function () { /* geen opnames: we vallen terug op de toestel-stem */ });
   }
+
+  function setVoicePack(id) {
+    if (!id) return;
+    state.voicePack = id;
+    loadManifest();
+  }
+
   function fileFor(text) {
     if (!state.useRecorded || !state.audioMap || !audioEl) return null;
     return state.audioMap[norm(text)] || null;
@@ -81,7 +106,7 @@
   }
 
   function init() {
-    loadManifest();
+    loadVoices();
     if (synthSupported) {
       pickVoice();
       if (typeof synth.addEventListener === "function") synth.addEventListener("voiceschanged", pickVoice);
@@ -175,7 +200,7 @@
     audioEl.onended = done;
     audioEl.onerror = function () { if (myToken === state.token) speakSynth(text, myToken, opts); };
     try {
-      audioEl.src = AUDIO_BASE + file;
+      audioEl.src = packDir() + file;
       audioEl.playbackRate = Math.max(0.6, Math.min(1.6, state.rate));
       if ("preservesPitch" in audioEl) audioEl.preservesPitch = true;
       var p = audioEl.play();
@@ -259,6 +284,9 @@
     hasRecorded: function () { return !!state.audioMap; },
     isUsingRecorded: function () { return state.useRecorded && !!state.audioMap; },
     setUseRecorded: setUseRecorded,
+    getVoicePacks: function () { return state.voicePacks.slice(); },
+    getVoicePack: function () { return state.voicePack; },
+    setVoicePack: setVoicePack,
     setEnabled: setEnabled,
     setRate: setRate,
     getRate: function () { return state.rate; },

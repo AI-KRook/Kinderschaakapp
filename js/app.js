@@ -6,7 +6,7 @@
   "use strict";
 
   var App = {
-    settings: { sound: true, recorded: true, rate: 1.0, difficulty: 1, voiceURI: null },
+    settings: { sound: true, recorded: true, voicePack: "fenna", rate: 1.0, difficulty: 1, voiceURI: null },
     progress: {},
     _runToken: 0,
     _run: null
@@ -200,6 +200,7 @@
   /* ---------- ouder-instellingen ---------- */
   function openSettings() {
     populateVoices();
+    populateVoicePacks();
     $("set-rate").value = App.settings.rate;
     $("set-recorded").setAttribute("aria-pressed", String(App.settings.recorded !== false));
     refreshSoundUI();
@@ -239,6 +240,23 @@
       o.value = v.voiceURI;
       o.textContent = v.name + " (" + v.lang + ")";
       if (App.settings.voiceURI === v.voiceURI) o.selected = true;
+      sel.appendChild(o);
+    });
+  }
+
+  function populateVoicePacks() {
+    var sel = $("set-voicepack"), row = $("voicepack-row");
+    if (!sel) return;
+    var packs = Speech.getVoicePacks();
+    if (!packs.length) { if (row) row.style.display = "none"; return; }
+    if (row) row.style.display = "";
+    var current = App.settings.voicePack || Speech.getVoicePack();
+    sel.innerHTML = "";
+    packs.forEach(function (p) {
+      var o = document.createElement("option");
+      o.value = p.id;
+      o.textContent = p.naam || p.id;
+      if (current === p.id) o.selected = true;
       sel.appendChild(o);
     });
   }
@@ -315,7 +333,17 @@
       Speech.speak("Klaar! We kunnen weer helemaal opnieuw beginnen.", { remember: false });
     });
 
+    $("set-voicepack").addEventListener("change", function () {
+      App.settings.voicePack = this.value;
+      Speech.setVoicePack(this.value);
+      saveSettings();
+      setTimeout(function () {
+        Speech.speak("Hoi! Ik ben Hinnik het paardje. Zullen we samen leren schaken?", { remember: false });
+      }, 400);
+    });
+
     Speech.on("voices", populateVoices);
+    Speech.on("voicepacks", populateVoicePacks);
 
     // tekstballon meeschrijven met wat Hinnik zegt (steun voor de ouder)
     Speech.on("text", function (text) {
@@ -352,6 +380,7 @@
     Speech.init();
     Speech.setEnabled(App.settings.sound);
     Speech.setUseRecorded(App.settings.recorded !== false);
+    Speech.setVoicePack(App.settings.voicePack || "fenna");
     Speech.setRate(App.settings.rate);
     if (App.settings.voiceURI) Speech.setVoiceURI(App.settings.voiceURI);
 
