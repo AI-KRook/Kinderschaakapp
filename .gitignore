@@ -3,8 +3,9 @@
 __pycache__/
 *.pyc
 
-# losse stem-voorbeelden (alleen voor het kiezen van een stem)
+# losse stem-voorbeelden / testfragmenten
 stem-voorbeelden/
+intonatie-test/
 
 # OS
 .DS_Store

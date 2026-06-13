@@ -382,7 +382,7 @@
     buildMenu();
     // korte testzin: ontgrendelt en verwelkomt
     setTimeout(function () {
-      Speech.speak("Hoi! Ik ben Hinnik, het schaakpaardje. Wat leuk dat je er bent! Kies maar een plaatje, dan gaan we samen schaken leren.", { remember: false });
+      Speech.speak("Hoi! Ik ben Hinnik, het schaakpaardje. Wat leuk dat je er bent! Kies maar een plaatje. Dan gaan we samen schaken leren.", { remember: false });
     }, 250);
   }
 

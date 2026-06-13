@@ -88,7 +88,9 @@ python tools/make_voice.py
 
 Dit genereert per stem een map `audio/<stem>/` met alle mp3-bestanden plus een `manifest.json`, en schrijft `audio/voices.json`. Welke stemmen worden opgenomen staat bovenin `tools/make_voice.py` in de lijst `VOICES` (met per stem `voice`, `rate`, `pitch` en een `naam` voor in het menu). Een stem toevoegen of veranderen? Pas die lijst aan en draai het script opnieuw. Beschikbare Nederlandse stemmen: `nl-NL-FennaNeural`, `nl-NL-ColetteNeural`, `nl-NL-MaartenNeural` (en de Vlaamse `nl-BE-DenaNeural`, `nl-BE-ArnaudNeural`). Lijst opvragen met `edge-tts --list-voices`. De ouder kiest de stem in de instellingen.
 
-Voeg je nieuwe gesproken zinnen toe aan de app? Zet de exacte tekst ook in de lijst `PHRASES` in `tools/make_voice.py` en draai het script opnieuw. Zinnen die nog geen opname hebben, worden automatisch door de toestel-stem uitgesproken.
+Voeg je nieuwe gesproken zinnen toe aan de app? Zet de exacte tekst ook in de lijst `PHRASES` in `tools/make_voice.py` en draai het script opnieuw. Met `python tools/check_sync.py` controleer je of alle gesproken zinnen ook echt zijn opgenomen. Zinnen die nog geen opname hebben, worden automatisch door de toestel-stem uitgesproken.
+
+De intonatie wordt gestuurd met korte zinnen, komma's en dubbele punten (pauzes), want deze gratis stem negeert losse klemtoontekens zoals "rechtdóór". Alleen woord-accenten die een ander woord maken, zoals "één", werken wel.
 
 ### App-iconen opnieuw maken
 
