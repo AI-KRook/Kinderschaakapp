@@ -133,6 +133,13 @@ PHRASES = [
     "Een tipje: schuif je toren helemaal naar boven, naast de koning.",
     "Een tipje: zet je dame naast de zwarte koning, op de bovenste rij.",
     "Wauw! Jij bent een echte puzzelkampioen. Knap hoor!",
+    # module: de opening
+    "Hoe begin je een potje goed? Ik leer je drie slimme regels!",
+    "Regel één: zet een pion in het midden. Schuif je pion twee vakjes vooruit.",
+    "Regel twee: haal je paard naar buiten, klaar om te springen.",
+    "Ook je loper mag naar buiten. Geef hem de ruimte.",
+    "En nu het belangrijkste: zet je koning veilig. Rokeer!",
+    "Knap! Je pion staat in het midden, je stukken zijn klaar, en je koning is veilig. Zo begin je als een kampioen!",
     # module 5: een partijtje
     "Met welke stukken wil je spelen? Wit of zwart?",
     "Nu gaan we een echt partijtje spelen! Jij speelt met de witte stukken, ik met de zwarte.",

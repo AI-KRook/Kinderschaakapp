@@ -674,6 +674,62 @@
     L.done();
   }
 
+  /* ============================ MODULE: DE OPENING ============================ */
+  // Drie eenvoudige openingsregels, stap voor stap voorgedaan op het echte bord.
+  async function moduleOpening(L) {
+    L.board.setFlipped(false);
+    L.board.reset();
+    L.board.setMode("move");
+    L.board.setMovable("w");
+    await L.say("Hoe begin je een potje goed? Ik leer je drie slimme regels!", { mood: "happy" });
+
+    // begeleid één zet: alleen 'only' beweegbaar, doelvakje 'target', daarna het zwarte antwoord
+    async function guide(only, target, zeg, reply) {
+      function setup() {
+        L.board.setMode("move");
+        L.board.setMovable(function (sq) { return sq === only; });
+        L.point(target);
+      }
+      setup();
+      await L.say(zeg);
+      while (true) {
+        var mv = await L.waitMove();
+        if (mv.to === target) {
+          L.unpoint();
+          L.blurt(pick(["Mooie zet!", "Goed bezig, ga zo door!", "Jij kan dit echt goed!"]));
+          if (reply) { await L.wait(450); L.board.move(reply[0], reply[1]); await L.wait(300); }
+          return;
+        }
+        await L.say(pick(TRY_AGAIN));
+        L.board.undoLast();
+        setup();
+      }
+    }
+
+    await guide("e2", "e4", "Regel één: zet een pion in het midden. Schuif je pion twee vakjes vooruit.", ["e7", "e5"]);
+    await guide("g1", "f3", "Regel twee: haal je paard naar buiten, klaar om te springen.", ["b8", "c6"]);
+    await guide("f1", "c4", "Ook je loper mag naar buiten. Geef hem de ruimte.", ["f8", "c5"]);
+
+    // rokeren: alleen de koning beweegbaar, herken de korte rokade
+    L.board.setMode("move");
+    L.board.setMovable(function (sq) { return sq === "e1"; });
+    L.point("g1");
+    await L.say("En nu het belangrijkste: zet je koning veilig. Rokeer!");
+    while (true) {
+      var mv = await L.waitMove();
+      if (mv.flags && mv.flags.indexOf("k") >= 0) { L.unpoint(); break; }
+      await L.say(pick(TRY_AGAIN));
+      L.board.undoLast();
+      L.board.setMode("move");
+      L.board.setMovable(function (sq) { return sq === "e1"; });
+      L.point("g1");
+    }
+    L.cheer();
+    L.star();
+    await L.say("Knap! Je pion staat in het midden, je stukken zijn klaar, en je koning is veilig. Zo begin je als een kampioen!", { mood: "happy" });
+    L.done();
+  }
+
   /* ---------- registratie ---------- */
   window.Modules = {
     list: [
@@ -682,6 +738,7 @@
       { id: "capture",   emoji: "💥", title: "Slaan",            run: moduleCapture },
       { id: "checkmate", emoji: "👑", title: "Schaak en mat",    run: moduleCheckmate },
       { id: "puzzles",   emoji: "🧩", title: "Puzzels",          run: modulePuzzles },
+      { id: "opening",   emoji: "🚀", title: "De opening",       run: moduleOpening },
       { id: "play",      emoji: "🏆", title: "Een partijtje",    run: modulePlay }
     ]
   };

@@ -113,7 +113,8 @@
       card.type = "button";
       card.className = "menu-card"
         + (mod.id === "play" ? " wide play-card" : "")
-        + (mod.id === "puzzles" ? " wide puzzle-card" : "");
+        + (mod.id === "puzzles" ? " wide puzzle-card" : "")
+        + (mod.id === "opening" ? " wide open-card" : "");
       if (App.progress[mod.id]) card.classList.add("done");
       card.innerHTML =
         '<span class="card-num">' + (i + 1) + '</span>' +
