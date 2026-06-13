@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
+  <title>Schaken met Hinnik het Paardje</title>
+  <meta name="description" content="Leer schaken met Hinnik het paardje. Alles wordt hardop uitgelegd in het Nederlands.">
+
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#ffcf5c">
+  <link rel="icon" href="icons/icon-192.png">
+
+  <!-- iOS / Safari -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Hinnik">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <div id="app">
+
+    <!-- ====================== STARTSCHERM ====================== -->
+    <section id="screen-start" class="screen screen-start is-active">
+      <div class="start-clouds" aria-hidden="true"></div>
+      <div class="start-inner">
+        <div id="start-mascot" class="start-mascot" aria-hidden="true"></div>
+        <h1 class="start-title">Schaken<br><span>met Hinnik</span></h1>
+        <button id="start-button" class="start-button" type="button" aria-label="Tik om te beginnen">
+          <span class="start-button-icon">▶</span>
+          <span class="start-button-text">Tik om te beginnen</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- ====================== MENU ====================== -->
+    <section id="screen-menu" class="screen screen-menu">
+      <header class="topbar">
+        <button class="icon-btn parent-btn" id="parent-btn" type="button" aria-label="Voor de ouder, houd ingedrukt">
+          <span class="parent-ring"><span class="parent-ring-fill"></span></span>
+          <span class="parent-gear">⚙️</span>
+        </button>
+        <div class="topbar-title">Wat wil je leren?</div>
+        <button class="icon-btn sound-btn" id="sound-btn-menu" type="button" aria-label="Geluid aan of uit"></button>
+      </header>
+
+      <div class="menu-grid" id="menu-grid">
+        <!-- module knoppen worden door app.js gevuld -->
+      </div>
+    </section>
+
+    <!-- ====================== LES / SPEL ====================== -->
+    <section id="screen-lesson" class="screen screen-lesson">
+      <header class="topbar">
+        <button class="icon-btn home-btn" id="home-btn" type="button" aria-label="Terug naar het menu">🏠</button>
+        <div class="topbar-title" id="lesson-title"></div>
+        <button class="icon-btn sound-btn" id="sound-btn-lesson" type="button" aria-label="Geluid aan of uit"></button>
+      </header>
+
+      <div class="board-wrap">
+        <div id="board" class="board" role="grid" aria-label="Schaakbord"></div>
+        <div id="board-confetti" class="confetti-layer" aria-hidden="true"></div>
+      </div>
+
+      <div class="lesson-actions" id="lesson-actions">
+        <!-- knoppen zoals 'verder' verschijnen hier -->
+      </div>
+    </section>
+
+    <!-- ====================== MASCOTTE-DOK (altijd in beeld) ====================== -->
+    <div id="dock" class="dock">
+      <button id="replay-btn" class="replay-btn" type="button" aria-label="Zeg het nog eens">
+        <span class="replay-icon">🔊</span>
+        <span class="replay-again">↻</span>
+      </button>
+      <div id="dock-mascot" class="dock-mascot"></div>
+      <div id="speech-bubble" class="speech-bubble"><span id="speech-text"></span></div>
+    </div>
+
+    <!-- ====================== OUDER-INSTELLINGEN ====================== -->
+    <div id="settings" class="overlay" aria-hidden="true">
+      <div class="settings-card" role="dialog" aria-label="Instellingen voor de ouder">
+        <h2 class="settings-title">Voor de ouder</h2>
+
+        <div class="setting-row">
+          <label class="setting-label">Geluid</label>
+          <button id="set-sound" class="toggle" type="button" aria-pressed="true"><span class="knob"></span></button>
+        </div>
+
+        <div class="setting-row">
+          <label class="setting-label" for="set-rate">Spreeksnelheid</label>
+          <input id="set-rate" class="slider" type="range" min="0.6" max="1.1" step="0.05" value="0.9">
+        </div>
+
+        <div class="setting-row">
+          <label class="setting-label">Moeilijkheid computer</label>
+          <div class="seg" id="set-difficulty">
+            <button data-level="1" class="seg-btn is-on" type="button">Heel makkelijk</button>
+            <button data-level="2" class="seg-btn" type="button">Een beetje slim</button>
+          </div>
+        </div>
+
+        <div class="setting-row" id="voice-row">
+          <label class="setting-label" for="set-voice">Stem</label>
+          <select id="set-voice" class="select"></select>
+        </div>
+
+        <div class="settings-buttons">
+          <button id="set-test" class="ghost-btn" type="button">Test de stem</button>
+          <button id="set-reset" class="ghost-btn" type="button">Voortgang wissen</button>
+          <button id="set-close" class="primary-btn" type="button">Klaar</button>
+        </div>
+        <p class="settings-note">Geen account, geen reclame, geen internet nodig. Alles blijft op dit toestel.</p>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Scripts (gewone scripts, vaste laadvolgorde) -->
+  <script src="vendor/chess.js"></script>
+  <script src="js/speech.js"></script>
+  <script src="js/mascotte.js"></script>
+  <script src="js/board.js"></script>
+  <script src="js/bot.js"></script>
+  <script src="js/modules.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
