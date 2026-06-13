@@ -579,5 +579,19 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 .primary-btn { padding: 12px 22px; border-radius: 14px; background: var(--coral); color: #fff; font-weight: 800; margin-left: auto; }
 .settings-note { font-size: 12px; color: var(--ink-soft); margin: 16px 0 0; text-align: center; }
 
+/* beschrijvende tekst onder de app (voor zoekmachines/AI). Zichtbaar op het
+   startscherm onder de vouw; verdwijnt zodra het kind aan het spelen is. */
+.page-info {
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 26px 22px calc(var(--safe-bottom) + 36px);
+  color: var(--ink);
+  line-height: 1.5;
+}
+.page-info h2 { font-size: 20px; margin: 20px 0 8px; }
+.page-info h3 { font-size: 16px; margin: 14px 0 4px; }
+.page-info p { font-size: 15px; color: var(--ink-soft); margin: 0 0 8px; }
+body.app-started .page-info { display: none; }
+
 /* hide helper */
 .hidden { display: none !important; }

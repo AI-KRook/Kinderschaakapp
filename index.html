@@ -3,8 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
-  <title>Schaken met Hinnik het Paardje</title>
-  <meta name="description" content="Leer schaken met Hinnik het paardje. Alles wordt hardop uitgelegd in het Nederlands.">
+  <title>Schaken leren voor kinderen, met Hinnik het paardje</title>
+  <meta name="description" content="Gratis app om kinderen schaken te leren in het Nederlands. Alles wordt hardop uitgelegd. Geen account, geen reclame, werkt offline.">
+  <link rel="canonical" href="https://ai-krook.github.io/Kinderschaakapp/">
 
   <!-- PWA -->
   <link rel="manifest" href="manifest.json">
@@ -18,6 +19,22 @@
   <meta name="apple-mobile-web-app-title" content="Hinnik">
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 
+  <!-- Open Graph (delen via WhatsApp, Facebook, etc.) -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Schaken leren voor kinderen, met Hinnik het paardje">
+  <meta property="og:description" content="Gratis Nederlandstalige app waarmee kinderen leren schaken. Hardop uitgelegd, geen reclame, werkt offline.">
+  <meta property="og:url" content="https://ai-krook.github.io/Kinderschaakapp/">
+  <meta property="og:image" content="https://ai-krook.github.io/Kinderschaakapp/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:locale" content="nl_NL">
+
+  <!-- Twitter/X card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Schaken leren voor kinderen, met Hinnik het paardje">
+  <meta name="twitter:description" content="Gratis Nederlandstalige app waarmee kinderen leren schaken. Hardop uitgelegd, geen reclame, werkt offline.">
+  <meta name="twitter:image" content="https://ai-krook.github.io/Kinderschaakapp/og-image.png">
+
   <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
@@ -28,7 +45,7 @@
       <div class="start-clouds" aria-hidden="true"></div>
       <div class="start-inner">
         <div id="start-mascot" class="start-mascot" aria-hidden="true"></div>
-        <h1 class="start-title">Schaken<br><span>met Hinnik</span></h1>
+        <h1 class="start-title">Schaken leren <br><span>met Hinnik</span></h1>
         <button id="start-button" class="start-button" type="button" aria-label="Tik om te beginnen">
           <span class="start-button-icon">▶</span>
           <span class="start-button-text">Tik om te beginnen</span>
@@ -155,6 +172,21 @@
 
   </div>
 
+  <!-- Beschrijvende tekst voor zoekmachines en AI (zichtbaar onder de app op het startscherm) -->
+  <section class="page-info" aria-label="Over deze app">
+    <h2>Gratis schaken leren voor kinderen</h2>
+    <p>Met Hinnik het paardje leert je kind spelenderwijs schaken, helemaal in het Nederlands. Alle uitleg gebeurt hardop, dus je kind hoeft nog niet te kunnen lezen. De app is gratis, heeft geen account en geen reclame, en werkt offline. Geschikt voor kinderen vanaf ongeveer 4 jaar. Je kind leert de stukken, slaan, schaak en mat, doet tactiek-puzzels en speelt een partijtje tegen de computer op vier niveaus.</p>
+    <h2>Veelgestelde vragen</h2>
+    <h3>Is de schaakapp gratis?</h3>
+    <p>Ja, de app is volledig gratis. Er is geen account nodig en er is geen reclame.</p>
+    <h3>Vanaf welke leeftijd kan mijn kind schaken leren met de app?</h3>
+    <p>De app is gemaakt voor kinderen vanaf ongeveer 4 jaar. Alle uitleg gebeurt hardop, dus lezen is niet nodig.</p>
+    <h3>Werkt de app zonder internet?</h3>
+    <p>Ja, de app werkt offline. Alles blijft op het toestel staan.</p>
+    <h3>Is de app in het Nederlands?</h3>
+    <p>Ja, de app is volledig Nederlandstalig en legt elke zet hardop uit.</p>
+  </section>
+
   <!-- Scripts (gewone scripts, vaste laadvolgorde) -->
   <script src="vendor/chess.js"></script>
   <script src="js/speech.js"></script>
@@ -164,5 +196,65 @@
   <script src="js/engine.js"></script>
   <script src="js/modules.js"></script>
   <script src="js/app.js"></script>
+
+  <!-- Structured data voor zoekmachines en AI-tools -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Hinnik: schaken leren voor kinderen",
+    "description": "Gratis Nederlandstalige web-app waarmee kinderen leren schaken. Alle uitleg gebeurt hardop. Geen account, geen reclame, werkt offline.",
+    "url": "https://ai-krook.github.io/Kinderschaakapp/",
+    "applicationCategory": "EducationalApplication",
+    "operatingSystem": "Web (iOS, Android, desktop via browser)",
+    "inLanguage": "nl-NL",
+    "isAccessibleForFree": true,
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "EUR"
+    },
+    "audience": {
+      "@type": "PeopleAudience",
+      "suggestedMinAge": 4,
+      "suggestedMaxAge": 10
+    },
+    "featureList": [
+      "Schaken leren stap voor stap",
+      "Alles wordt hardop uitgelegd in het Nederlands",
+      "Speelbaar tegen de computer op vier niveaus",
+      "Werkt offline, geen account nodig",
+      "Geen reclame"
+    ]
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "Is de schaakapp gratis?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Ja, de app is volledig gratis. Er is geen account nodig en er is geen reclame." }
+      },
+      {
+        "@type": "Question",
+        "name": "Vanaf welke leeftijd kan mijn kind schaken leren met de app?",
+        "acceptedAnswer": { "@type": "Answer", "text": "De app is gemaakt voor kinderen vanaf ongeveer 4 jaar. Alle uitleg gebeurt hardop, dus lezen is niet nodig." }
+      },
+      {
+        "@type": "Question",
+        "name": "Werkt de app zonder internet?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Ja, de app werkt offline. Alles blijft op het toestel staan." }
+      },
+      {
+        "@type": "Question",
+        "name": "Is de app in het Nederlands?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Ja, de app is volledig Nederlandstalig en legt elke zet hardop uit." }
+      }
+    ]
+  }
+  </script>
 </body>
 </html>

@@ -1,8 +1,9 @@
 {
-  "name": "Schaken met Hinnik",
+  "name": "Schaken leren voor kinderen, met Hinnik",
   "short_name": "Hinnik",
-  "description": "Leer schaken met Hinnik het paardje. Alles wordt hardop in het Nederlands uitgelegd.",
-  "lang": "nl",
+  "description": "Gratis Nederlandstalige app waarmee kinderen leren schaken. Alles wordt hardop uitgelegd. Geen account, geen reclame, werkt offline.",
+  "categories": ["education", "games", "kids"],
+  "lang": "nl-NL",
   "dir": "ltr",
   "start_url": ".",
   "scope": ".",

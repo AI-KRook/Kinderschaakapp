@@ -448,6 +448,7 @@
 
   /* ---------- start (ontgrendelt geluid) ---------- */
   function onStart() {
+    document.body.classList.add("app-started"); // verberg de SEO-tekst tijdens het spelen
     Speech.unlock();
     Speech.setEnabled(App.settings.sound);
     Speech.setRate(App.settings.rate);

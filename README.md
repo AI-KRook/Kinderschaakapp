@@ -119,6 +119,17 @@ Bewust nog niet meegenomen, voor een latere uitbreiding:
 - **Online spelen tegen anderen** en een account met voortgang in de cloud.
 - **Een visuele schaak-/mat-melding** op het bord (nu vooral met de stem uitgelegd).
 
+## Vindbaarheid (zoekmachines en AI)
+
+Voor Google en AI-zoekmachines (ChatGPT, Perplexity, Gemini, Google AI Overviews):
+
+- **Meta-tags** in `index.html`: beschrijvende titel, omschrijving, canonical, Open Graph en Twitter-card, plus `og-image.png` (1200x630, gemaakt met `python tools/make_og.py`).
+- **Structured data** (JSON-LD) onderaan `index.html`: een `WebApplication`- en een `FAQPage`-blok. Controleer ze met de Rich Results Test van Google (search.google.com/test/rich-results).
+- **Zichtbare tekst** onder de app op het startscherm: een korte beschrijving en dezelfde veelgestelde vragen als gewone tekst.
+- **`sitemap.xml`** met de app-URL.
+
+**Let op, de GitHub Pages-valkuil.** Crawlers lezen `robots.txt` en `llms.txt` alleen op de domeinroot, dus op `ai-krook.github.io/robots.txt`, niet op `ai-krook.github.io/Kinderschaakapp/robots.txt`. Die twee bestanden staan hier wel klaar, maar hebben pas effect als ze in de gebruikersrepo `ai-krook.github.io` staan (de root) of als er een eigen domein aan dit project wordt gekoppeld. Een eigen domein (bijvoorbeeld `schakenmethinnik.nl`) lost dit op en is makkelijker te onthouden en te citeren; koppelen via een `CNAME`-bestand in de repo plus DNS bij de registrar.
+
 ## Mappenstructuur
 
 ```

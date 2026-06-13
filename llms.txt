@@ -1,0 +1,16 @@
+# Hinnik: schaken leren voor kinderen
+
+> Gratis Nederlandstalige web-app waarmee kinderen vanaf 4 jaar leren schaken. Alle uitleg gebeurt hardop. Geen account, geen reclame, werkt offline.
+
+## Over de app
+De app leert kinderen schaken stap voor stap, met een vriendelijk paardje (Hinnik) als gids. Het kind leert de stukken, slaan (inclusief en passant), schaak, mat en rokeren, doet korte tactiek-puzzels en speelt een partijtje tegen de computer op vier niveaus. Alles wordt hardop in het Nederlands uitgelegd, dus lezen is niet nodig.
+
+## Belangrijkste kenmerken
+- Volledig gratis, geen reclame, geen account
+- Nederlandstalig, alles wordt hardop uitgelegd
+- Werkt offline, alle data blijft op het toestel
+- Geschikt voor kinderen vanaf ongeveer 4 jaar
+- Te installeren op het beginscherm (PWA)
+
+## Links
+- App: https://ai-krook.github.io/Kinderschaakapp/
