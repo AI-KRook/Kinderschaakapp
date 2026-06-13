@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Uitspraak-test: rokeren</title>
+  <style>
+    body { font-family: ui-rounded, system-ui, sans-serif; max-width: 540px; margin: 0 auto;
+           padding: 20px; background: #fff7e8; color: #4a3522; }
+    h1 { font-size: 22px; }
+    p.uitleg { font-size: 15px; line-height: 1.4; color: #7a6450; }
+    .item { display: flex; align-items: center; gap: 12px; background: #fffdf7; border-radius: 16px;
+            padding: 14px; margin: 10px 0; box-shadow: 0 4px 12px rgba(74,53,34,.12); }
+    .item .naam { flex: 1; font-weight: 800; font-size: 18px; }
+    .item .zin { font-size: 12px; color: #7a6450; font-weight: 600; }
+    .item.same { opacity: .55; }
+    button.play { width: 56px; height: 56px; border: none; border-radius: 50%; flex: 0 0 auto;
+            background: linear-gradient(180deg,#ff7a59,#ef5b3c); color: #fff; font-size: 24px; cursor: pointer; }
+    .badge { font-size: 11px; background: #efe6d6; border-radius: 8px; padding: 2px 6px; color: #7a6450; }
+  </style>
+</head>
+<body>
+  <h1>Welke uitspraak van "rokeren" is goed? 🐴</h1>
+  <p class="uitleg">Tik op de oranje knop om elke variant te horen. Onthoud welke naam het beste klinkt
+     (ook voor "rokade" onderaan). Geef die naam aan mij door, dan zet ik die in de app.
+     De spelling op het scherm in de app blijft gewoon correct "rokeren".</p>
+  <div id="lijst"></div>
+  <audio id="speler"></audio>
+  <script>
+    var speler = document.getElementById('speler');
+    fetch('audio/_test/list.json').then(function(r){return r.json();}).then(function(items){
+      var box = document.getElementById('lijst');
+      items.forEach(function(it){
+        var row = document.createElement('div');
+        row.className = 'item' + (it.identiekAan ? ' same' : '');
+        row.innerHTML =
+          '<div class="naam">' + it.label +
+            (it.identiekAan ? ' <span class="badge">klinkt gelijk aan: ' + it.identiekAan + '</span>' : '') +
+            '<div class="zin">' + it.zin + '</div></div>';
+        var b = document.createElement('button');
+        b.className = 'play'; b.textContent = '▶';
+        b.addEventListener('click', function(){ speler.src = 'audio/_test/' + it.file; speler.play(); });
+        row.appendChild(b);
+        box.appendChild(row);
+      });
+    });
+  </script>
+</body>
+</html>
