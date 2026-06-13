@@ -119,6 +119,7 @@
     clearLessonActions();
     Board.clearGoals();
     Board.clearHighlights();
+    Board.setFlipped(false); // standaard wit onder; alleen het partijtje draait eventueel
     var run = { id: ++App._runToken, cancelled: false, pending: [] };
     App._run = run;
     var L = makeL(run, mod);

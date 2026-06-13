@@ -417,23 +417,23 @@
   }
 
   /* ============================ MODULE 5: EEN PARTIJTJE ============================ */
-  function showHintNow(L) {
-    if (!L.alive() || !window.Engine || L.board.turn() !== "w") return;
+  function showHintNow(L, human) {
+    if (!L.alive() || !window.Engine || L.board.turn() !== human) return;
     window.Engine.bestMove(L.board.fen(), { movetime: 600 }).then(function (best) {
-      if (!best || !L.alive() || L.board.turn() !== "w") return;
+      if (!best || !L.alive() || L.board.turn() !== human) return;
       L.board.showHintFrom(best.from);
       L.point(best.to);
       L.blurt("Zal ik je een tip geven? Zet dit stuk eens naar het vakje dat oplicht.");
     });
   }
 
-  function startHint(L, delay) {
+  function startHint(L, delay, human) {
     var s = { moved: false, timer: null };
-    s.timer = setTimeout(function () { if (!s.moved) showHintNow(L); }, delay);
+    s.timer = setTimeout(function () { if (!s.moved) showHintNow(L, human); }, delay);
     return s;
   }
 
-  function makeHintButton(L) {
+  function makeHintButton(L, human) {
     var actions = document.getElementById("lesson-actions");
     if (!actions) return null;
     actions.innerHTML = "";
@@ -441,26 +441,71 @@
     btn.type = "button";
     btn.className = "big-action sun hint-btn";
     btn.innerHTML = '<span class="ba-emoji">💡</span> Hint';
-    btn.addEventListener("click", function () { showHintNow(L); });
+    btn.addEventListener("click", function () { showHintNow(L, human); });
     actions.appendChild(btn);
     return btn;
   }
 
-  async function modulePlay(L) {
-    L.board.reset();
-    L.board.setMode("move");
-    L.board.setMovable("w");
-    if (window.Engine) window.Engine.warmup();
-    makeHintButton(L);
+  // het kind kiest met welke kleur het speelt
+  function chooseColor(L) {
+    return new Promise(function (resolve) {
+      var actions = document.getElementById("lesson-actions");
+      if (!actions) { resolve("w"); return; }
+      actions.innerHTML = "";
+      function mk(color, label, glyph, cls) {
+        var b = document.createElement("button");
+        b.type = "button";
+        b.className = "big-action " + cls;
+        b.innerHTML = '<span class="ba-emoji">' + glyph + '</span> ' + label;
+        b.addEventListener("click", function () {
+          if (!L.alive()) return;
+          actions.innerHTML = "";
+          resolve(color);
+        });
+        actions.appendChild(b);
+      }
+      mk("w", "Wit", "♔", "sun");
+      mk("b", "Zwart", "♚", "coral");
+      L.blurt("Met welke stukken wil je spelen? Wit of zwart?");
+    });
+  }
 
-    await L.say("Nu gaan we een echt partijtje spelen! Jij speelt met de witte stukken, ik met de zwarte.");
-    await L.say("Onthoud: jij wint als je mijn koning schaakmat zet. En pas goed op je eigen koning!");
-    await L.say("Jij mag beginnen, want wit zet altijd als eerste. Heb je hulp nodig? Tik dan op de lamp. Veel plezier!");
+  async function modulePlay(L) {
+    if (window.Engine) window.Engine.warmup();
+    L.board.setFlipped(false);
+    L.board.reset();
+    L.board.setMode("locked");
+
+    var human = await chooseColor(L);           // "w" of "b"
+    var bot = (human === "w") ? "b" : "w";
+    L.board.setFlipped(human === "b");          // bord draait om bij zwart
+    L.board.setMode("move");
+    L.board.setMovable(human);
+    makeHintButton(L, human);
+
+    var level = (window.App && App.settings.difficulty) || 1;
+
+    if (human === "w") {
+      await L.say("Nu gaan we een echt partijtje spelen! Jij speelt met de witte stukken, ik met de zwarte.");
+      await L.say("Onthoud: jij wint als je mijn koning schaakmat zet. En pas goed op je eigen koning!");
+      await L.say("Jij mag beginnen, want wit zet altijd als eerste. Heb je hulp nodig? Tik dan op de lamp. Veel plezier!");
+    } else {
+      await L.say("Nu gaan we een echt partijtje spelen! Jij speelt met de zwarte stukken, ik met de witte.");
+      await L.say("Onthoud: jij wint als je mijn koning schaakmat zet. En pas goed op je eigen koning!");
+      await L.say("Ik begin, want wit mag altijd eerst. Daarna ben jij. Heb je hulp nodig? Tik dan op de lamp. Veel plezier!");
+      // Hinnik (wit) doet de eerste zet
+      await L.wait(500);
+      var first = await window.Bot.chooseMove(L.board.game, level);
+      if (L.alive() && first && L.board.turn() === bot) {
+        L.board.move(first.from, first.to);
+        await L.wait(200);
+      }
+    }
 
     var moveCount = 0;
     while (true) {
-      L.board.setMovable("w");
-      var hint = startHint(L, 15000);
+      L.board.setMovable(human);
+      var hint = startHint(L, 15000, human);
       var mv = await L.waitMove();
       hint.moved = true;
       if (hint.timer) clearTimeout(hint.timer);
@@ -472,9 +517,8 @@
       if (L.board.isGameOver()) break;
 
       await L.wait(650);
-      var level = (window.App && App.settings.difficulty) || 1;
       var bm = await window.Bot.chooseMove(L.board.game, level);
-      if (!L.alive() || L.board.turn() !== "b") break; // les afgebroken of stand veranderd
+      if (!L.alive() || L.board.turn() !== bot) break; // les afgebroken of stand veranderd
       if (!bm) break;
       L.board.move(bm.from, bm.to);
       await L.wait(200);
@@ -487,7 +531,7 @@
     L.star();
     var msg;
     if (L.board.inCheckmate()) {
-      msg = (L.board.turn() === "b")
+      msg = (L.board.turn() === bot) // de partij die mat staat, is aan zet
         ? "Schaakmat! Jij hebt gewonnen! Wat ben jij een kampioen!"
         : "Oei, ik had even mazzel! Maar wat speelde jij goed, zeg.";
     } else {

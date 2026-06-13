@@ -17,6 +17,8 @@
     this.pointerEl = null;
     this.game = new Chess();
     this.cellBySquare = {};
+    this.cells2d = null;         // fysiek raster [rij][kolom] van cel-elementen
+    this.flipped = false;        // true = bord vanuit zwart bekeken
     this.pieceEls = {};
     this.goals = {};
     this.selected = null;
@@ -34,32 +36,20 @@
     this.el = el;
     el.innerHTML = "";
     this.cellBySquare = {};
+    this.cells2d = [];
     for (var row = 0; row < 8; row++) {
+      this.cells2d[row] = [];
       for (var col = 0; col < 8; col++) {
-        var sq = FILES[col] + (8 - row);
         var cell = document.createElement("div");
         cell.className = "cell " + (((row + col) % 2 === 0) ? "light" : "dark");
-        cell.dataset.square = sq;
         var dot = document.createElement("span");
         dot.className = "dot";
         cell.appendChild(dot);
-        // coördinaten: cijfer 8..1 op de linkerkolom, letter a..h op de onderste rij
-        if (col === 0) {
-          var rk = document.createElement("span");
-          rk.className = "coord rank";
-          rk.textContent = String(8 - row);
-          cell.appendChild(rk);
-        }
-        if (row === 7) {
-          var fl = document.createElement("span");
-          fl.className = "coord file";
-          fl.textContent = FILES[col];
-          cell.appendChild(fl);
-        }
         el.appendChild(cell);
-        this.cellBySquare[sq] = cell;
+        this.cells2d[row][col] = cell;
       }
     }
+    this._relabel(); // zet dataset.square, cellBySquare en de coördinaten (afhankelijk van de oriëntatie)
     this.piecesLayer = document.createElement("div");
     this.piecesLayer.className = "pieces";
     el.appendChild(this.piecesLayer);
@@ -88,6 +78,55 @@
     var w = this.el.clientWidth || this.el.getBoundingClientRect().width;
     if (w > 0) this.el.style.setProperty("--cell", (w / 8) + "px");
   };
+
+  /* ---------- oriëntatie (bord draaien voor zwart) ---------- */
+  // fysiek raster (rij,kolom) -> logisch veld, afhankelijk van de oriëntatie
+  Board.prototype._rcToSquare = function (r, c) {
+    return this.flipped ? (FILES[7 - c] + (r + 1)) : (FILES[c] + (8 - r));
+  };
+  // logisch veld -> fysieke (rij,kolom)
+  Board.prototype._squareRC = function (square) {
+    var file = FILES.indexOf(square[0]), rank = parseInt(square[1], 10);
+    return this.flipped ? { r: rank - 1, c: 7 - file } : { r: 8 - rank, c: file };
+  };
+
+  // (her)nummer de cellen + coördinaten voor de huidige oriëntatie
+  Board.prototype._relabel = function () {
+    this.cellBySquare = {};
+    for (var r = 0; r < 8; r++) {
+      for (var c = 0; c < 8; c++) {
+        var cell = this.cells2d[r][c];
+        var sq = this._rcToSquare(r, c);
+        cell.dataset.square = sq;
+        this.cellBySquare[sq] = cell;
+        var olds = cell.querySelectorAll(".coord");
+        for (var i = 0; i < olds.length; i++) olds[i].remove();
+        if (c === 0) {
+          var rk = document.createElement("span");
+          rk.className = "coord rank";
+          rk.textContent = sq[1];
+          cell.appendChild(rk);
+        }
+        if (r === 7) {
+          var fl = document.createElement("span");
+          fl.className = "coord file";
+          fl.textContent = sq[0];
+          cell.appendChild(fl);
+        }
+      }
+    }
+  };
+
+  Board.prototype.setFlipped = function (b) {
+    b = !!b;
+    if (b === this.flipped && this.cellBySquare && Object.keys(this.cellBySquare).length) return;
+    this.flipped = b;
+    this.clearSelection();
+    this.clearHighlights();
+    this._relabel();
+    this.renderFull();
+  };
+  Board.prototype.isFlipped = function () { return this.flipped; };
 
   /* ---------- stand zetten ---------- */
   Board.prototype.setFEN = function (fen) {
@@ -131,9 +170,8 @@
 
   /* ---------- tekenen ---------- */
   Board.prototype._transformFor = function (square) {
-    var col = FILES.indexOf(square[0]);
-    var row = 8 - parseInt(square[1], 10);
-    return "translate(" + (col * 100) + "%," + (row * 100) + "%)";
+    var rc = this._squareRC(square);
+    return "translate(" + (rc.c * 100) + "%," + (rc.r * 100) + "%)";
   };
 
   Board.prototype.renderFull = function () {
@@ -250,10 +288,9 @@
 
   /* ---------- wijzende hand ---------- */
   Board.prototype.pointAt = function (square) {
-    var col = FILES.indexOf(square[0]);
-    var row = 8 - parseInt(square[1], 10);
-    this.pointerEl.style.left = ((col + 0.5) * 12.5) + "%";
-    this.pointerEl.style.top = ((row + 0.5) * 12.5) + "%";
+    var rc = this._squareRC(square);
+    this.pointerEl.style.left = ((rc.c + 0.5) * 12.5) + "%";
+    this.pointerEl.style.top = ((rc.r + 0.5) * 12.5) + "%";
     this.pointerEl.classList.remove("hidden");
   };
   Board.prototype.clearPointer = function () { if (this.pointerEl) this.pointerEl.classList.add("hidden"); };
@@ -282,7 +319,7 @@
     var row = Math.floor(y / (rect.height / 8));
     col = Math.max(0, Math.min(7, col));
     row = Math.max(0, Math.min(7, row));
-    return FILES[col] + (8 - row);
+    return this._rcToSquare(row, col);
   };
 
   /* ---------- pointer-afhandeling (tik + sleep) ---------- */

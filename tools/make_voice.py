@@ -123,9 +123,12 @@ PHRASES = [
     "Een tipje: zet je dame naast de zwarte koning, op de bovenste rij.",
     "Wauw! Jij bent een echte puzzelkampioen. Knap hoor!",
     # module 5: een partijtje
+    "Met welke stukken wil je spelen? Wit of zwart?",
     "Nu gaan we een echt partijtje spelen! Jij speelt met de witte stukken, ik met de zwarte.",
+    "Nu gaan we een echt partijtje spelen! Jij speelt met de zwarte stukken, ik met de witte.",
     "Onthoud: jij wint als je mijn koning schaakmat zet. En pas goed op je eigen koning!",
     "Jij mag beginnen, want wit zet altijd als eerste. Heb je hulp nodig? Tik dan op de lamp. Veel plezier!",
+    "Ik begin, want wit mag altijd eerst. Daarna ben jij. Heb je hulp nodig? Tik dan op de lamp. Veel plezier!",
     "Lekker geslagen!", "Hebbes!", "Goed gepakt!",
     "Mooie zet!", "Goed bezig, ga zo door!", "Jij kan dit echt goed!",
     "Pas op! Je koning staat schaak. Hij wordt aangevallen.",
