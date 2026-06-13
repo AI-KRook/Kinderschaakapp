@@ -312,6 +312,17 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 }
 @keyframes blink { 0%,100%{opacity:.25;} 50%{opacity:.8;} }
 
+/* koning staat schaak: duidelijke rode gloed (ook voor wie niet leest) */
+.cell.incheck::after {
+  content: ""; position: absolute; inset: 6%;
+  border-radius: 16px;
+  box-shadow: 0 0 0 4px rgba(239,60,40,.9), 0 0 18px 7px rgba(239,60,40,.6);
+  background: radial-gradient(circle, rgba(239,60,40,.32), rgba(239,60,40,0) 72%);
+  animation: checkpulse .85s ease-in-out infinite;
+  pointer-events: none; z-index: 3;
+}
+@keyframes checkpulse { 0%,100%{ opacity: .55; } 50%{ opacity: 1; } }
+
 /* doel-ster / muntje voor oefeningen, gecentreerd in het vakje */
 .cell .goal {
   position: absolute; left: 50%; top: 50%;

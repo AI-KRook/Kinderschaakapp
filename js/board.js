@@ -149,6 +149,7 @@
       }
     }
     this._renderGoals();
+    this._markCheck();
   };
 
   Board.prototype._makePiece = function (square, type, color) {
@@ -215,8 +216,31 @@
 
   Board.prototype.clearHighlights = function () {
     Object.keys(this.cellBySquare).forEach(function (sq) {
-      this.cellBySquare[sq].classList.remove("lastmove", "hintfrom");
+      this.cellBySquare[sq].classList.remove("lastmove", "hintfrom", "incheck");
     }, this);
+  };
+
+  // markeer de koning die schaak staat met een rode gloed (zichtbaar voor een
+  // kind dat nog niet leest). Wordt na elke zet en bij elke nieuwe stand gezet.
+  Board.prototype._markCheck = function () {
+    Object.keys(this.cellBySquare).forEach(function (sq) {
+      this.cellBySquare[sq].classList.remove("incheck");
+    }, this);
+    var inChk = false;
+    try { inChk = this.game.in_check(); } catch (e) { inChk = false; }
+    if (!inChk) return;
+    var turn = this.game.turn();
+    var board = this.game.board();
+    for (var r = 0; r < 8; r++) {
+      for (var c = 0; c < 8; c++) {
+        var p = board[r][c];
+        if (p && p.type === "k" && p.color === turn) {
+          var cell = this.cellBySquare[FILES[c] + (8 - r)];
+          if (cell) cell.classList.add("incheck");
+          return;
+        }
+      }
+    }
   };
 
   Board.prototype.showHintFrom = function (square) {
@@ -361,6 +385,7 @@
     var cf = this.cellBySquare[from], ct = this.cellBySquare[to];
     if (cf) cf.classList.add("lastmove");
     if (ct) ct.classList.add("lastmove");
+    this._markCheck();
 
     if (typeof this.onMove === "function") this.onMove(move);
     if (byUser && typeof this.onUserMove === "function") this.onUserMove(move);
