@@ -37,6 +37,65 @@
     if (el) el.textContent = String(App.progress.stars || 0);
   }
 
+  /* ---------- verkleedkast: Hinnik aankleden met gespaarde sterren ---------- */
+  var OUTFITS = [
+    { id: "kroon",     naam: "Kroon",     emoji: "👑", cost: 3 },
+    { id: "strik",     naam: "Strik",     emoji: "🎀", cost: 6 },
+    { id: "bril",      naam: "Bril",      emoji: "🤓", cost: 10 },
+    { id: "feesthoed", naam: "Feesthoed", emoji: "🎉", cost: 15 },
+    { id: "bloem",     naam: "Bloem",     emoji: "🌸", cost: 22 },
+    { id: "toverhoed", naam: "Toverhoed", emoji: "🧙", cost: 30 }
+  ];
+  var _wardrobeMounted = false;
+
+  function openWardrobe() {
+    buildWardrobe();
+    var w = $("wardrobe");
+    w.classList.add("is-open");
+    w.setAttribute("aria-hidden", "false");
+  }
+  function closeWardrobe() {
+    Speech.stopPreview();
+    var w = $("wardrobe");
+    w.classList.remove("is-open");
+    w.setAttribute("aria-hidden", "true");
+  }
+  function buildWardrobe() {
+    var prev = $("wardrobe-mascot");
+    if (prev && !_wardrobeMounted) { Paardje.mount(prev, false); _wardrobeMounted = true; }
+    Paardje.setOutfit(App.progress.outfit || "");
+    var grid = $("wardrobe-grid");
+    if (!grid) return;
+    grid.innerHTML = "";
+    var stars = App.progress.stars || 0;
+    var current = App.progress.outfit || "";
+    grid.appendChild(makeWearItem({ id: "", naam: "Niets", emoji: "🚫", cost: 0 }, true, current === ""));
+    OUTFITS.forEach(function (o) {
+      grid.appendChild(makeWearItem(o, stars >= o.cost, current === o.id));
+    });
+  }
+  function makeWearItem(o, unlocked, on) {
+    var b = document.createElement("button");
+    b.type = "button";
+    b.className = "wear-item" + (on ? " is-on" : "") + (unlocked ? "" : " locked");
+    b.innerHTML = '<span class="wi-emoji">' + o.emoji + '</span>' +
+      '<span>' + o.naam + '</span>' +
+      (unlocked ? "" : '<span class="wi-cost">⭐ ' + o.cost + '</span>');
+    b.addEventListener("click", function () {
+      if (!unlocked) { Speech.preview("Spaar nog meer sterren, dan mag je deze op!"); return; }
+      equipOutfit(o.id);
+    });
+    return b;
+  }
+  function equipOutfit(id) {
+    App.progress.outfit = id;
+    saveProgress();
+    Paardje.setOutfit(id);
+    Paardje.cheer();
+    buildWardrobe();
+    if (id) Speech.preview("Kijk eens, wat zie ik er mooi uit!");
+  }
+
   /* ---------- schermen ---------- */
   function showScreen(name) {
     ["screen-start", "screen-menu", "screen-lesson"].forEach(function (id) {
@@ -327,6 +386,11 @@
     $("sound-btn-menu").addEventListener("click", toggleSound);
     $("sound-btn-lesson").addEventListener("click", toggleSound);
 
+    // verkleedkast
+    $("wardrobe-btn").addEventListener("click", openWardrobe);
+    $("wardrobe-close").addEventListener("click", closeWardrobe);
+    $("wardrobe").addEventListener("click", function (e) { if (e.target === $("wardrobe")) closeWardrobe(); });
+
     setupParentButton();
 
     // instellingen
@@ -402,6 +466,7 @@
     Paardje.mount($("start-mascot"), false);
     Paardje.mount($("dock-mascot"), true);
     Paardje.bindSpeech();
+    Paardje.setOutfit(App.progress.outfit || ""); // bewaarde verkleedspullen tonen
 
     Board.mount($("board"));
 

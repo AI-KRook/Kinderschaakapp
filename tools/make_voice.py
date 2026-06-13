@@ -146,6 +146,9 @@ PHRASES = [
     "Zo klinkt de stem van het toestel.",
     "Zo klink ik nu.",
     "Klaar! We kunnen weer helemaal opnieuw beginnen.",
+    # verkleedkast
+    "Kijk eens, wat zie ik er mooi uit!",
+    "Spaar nog meer sterren, dan mag je deze op!",
 ]
 for p in PRAISE:
     PHRASES.append(p + " Je hebt alle sterretjes!")

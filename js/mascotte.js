@@ -53,6 +53,50 @@
     '<ellipse class="m-mouth" cx="132" cy="170" rx="9" ry="4" fill="#f4a6a0" opacity=".8"/>' +
     // voorlokje
     '<path d="M120 40 q-10 14 -2 30 q10 -8 18 -2 q-2 -18 -16 -28z" fill="#c9863f"/>' +
+    // ===== accessoires (verkleedspullen) — standaard verborgen, CSS toont de gekozen =====
+    '<g class="m-accessory">' +
+      // kroon
+      '<g class="acc acc-kroon">' +
+        '<path d="M88 50 L96 22 L114 42 L131 16 L148 42 L166 22 L174 50 Q131 60 88 50 Z" fill="#ffcf5c" stroke="#e0951f" stroke-width="3" stroke-linejoin="round"/>' +
+        '<circle cx="96" cy="24" r="4" fill="#ff7a59"/>' +
+        '<circle cx="131" cy="18" r="5" fill="#ef5b3c"/>' +
+        '<circle cx="166" cy="24" r="4" fill="#ff7a59"/>' +
+      '</g>' +
+      // strik
+      '<g class="acc acc-strik">' +
+        '<path d="M131 42 L104 30 L104 56 Z" fill="#ff7a59" stroke="#ef5b3c" stroke-width="2.5" stroke-linejoin="round"/>' +
+        '<path d="M131 42 L158 30 L158 56 Z" fill="#ff7a59" stroke="#ef5b3c" stroke-width="2.5" stroke-linejoin="round"/>' +
+        '<circle cx="131" cy="43" r="7" fill="#ef5b3c"/>' +
+      '</g>' +
+      // bril
+      '<g class="acc acc-bril" fill="none" stroke="#3a2a1e" stroke-width="4">' +
+        '<circle cx="106" cy="106" r="20"/>' +
+        '<circle cx="156" cy="105" r="20"/>' +
+        '<path d="M126 104 q5 -5 10 0"/>' +
+        '<path d="M86 103 l-12 -5"/>' +
+        '<path d="M176 102 l12 -4"/>' +
+      '</g>' +
+      // feesthoed
+      '<g class="acc acc-feesthoed">' +
+        '<path d="M131 4 L106 54 L156 54 Z" fill="#5cb8ff" stroke="#2b8fd6" stroke-width="3" stroke-linejoin="round"/>' +
+        '<circle cx="131" cy="7" r="6" fill="#ffcf5c"/>' +
+        '<circle cx="124" cy="34" r="3.5" fill="#fff"/>' +
+        '<circle cx="137" cy="45" r="3.5" fill="#fff"/>' +
+      '</g>' +
+      // bloem
+      '<g class="acc acc-bloem">' +
+        '<g fill="#ff9ec7">' +
+          '<circle cx="84" cy="32" r="8"/><circle cx="72" cy="42" r="8"/><circle cx="96" cy="42" r="8"/><circle cx="78" cy="54" r="8"/><circle cx="90" cy="54" r="8"/>' +
+        '</g>' +
+        '<circle cx="84" cy="44" r="7" fill="#ffd65c"/>' +
+      '</g>' +
+      // toverhoed
+      '<g class="acc acc-toverhoed">' +
+        '<ellipse cx="131" cy="52" rx="44" ry="9" fill="#6b4fa0"/>' +
+        '<path d="M131 4 L112 52 L150 52 Z" fill="#7d5fc0" stroke="#5a3f95" stroke-width="3" stroke-linejoin="round"/>' +
+        '<path d="M128 24 l3 7 7 3 -7 3 -3 7 -3 -7 -7 -3 7 -3z" fill="#ffd65c"/>' +
+      '</g>' +
+    '</g>' +
   '</g>' +
 '</svg>';
   }
@@ -63,15 +107,30 @@
     this.boardForPoint = null;
     this._cheerTimer = null;
     this._nudgeTimer = null;
+    this.outfit = "";     // welk accessoire Hinnik draagt
   }
 
   Mascotte.prototype.mount = function (el, isActive) {
     if (!el) return;
     el.innerHTML = svgMarkup();
     var svg = el.querySelector(".mascot-svg");
+    if (this.outfit) svg.classList.add("wear-" + this.outfit);
     this.roots.push(svg);
     if (isActive) this.active = svg;
   };
+
+  // Hinnik een accessoire opzetten (of "" voor niets). Werkt op alle plekken.
+  Mascotte.prototype.setOutfit = function (id) {
+    this.outfit = id || "";
+    var want = this.outfit ? "wear-" + this.outfit : null;
+    this._eachSvg(function (svg) {
+      var remove = [];
+      svg.classList.forEach(function (c) { if (c.indexOf("wear-") === 0) remove.push(c); });
+      remove.forEach(function (c) { svg.classList.remove(c); });
+      if (want) svg.classList.add(want);
+    });
+  };
+  Mascotte.prototype.getOutfit = function () { return this.outfit; };
 
   Mascotte.prototype._eachSvg = function (cb) { this.roots.forEach(cb); };
 

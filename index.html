@@ -47,10 +47,11 @@
         <button class="icon-btn sound-btn" id="sound-btn-menu" type="button" aria-label="Geluid aan of uit"></button>
       </header>
 
-      <div class="star-banner" aria-label="Jouw sterren">
+      <button class="star-banner" id="wardrobe-btn" type="button" aria-label="Hinnik aankleden">
         <span class="star-banner-icon">⭐</span>
         <span class="star-banner-text">Jouw sterren: <span id="star-count">0</span></span>
-      </div>
+        <span class="star-banner-go" aria-hidden="true">🎀</span>
+      </button>
 
       <div class="menu-grid" id="menu-grid">
         <!-- module knoppen worden door app.js gevuld -->
@@ -136,6 +137,19 @@
           <button id="set-close" class="primary-btn" type="button">Klaar</button>
         </div>
         <p class="settings-note">Geen account, geen reclame, geen internet nodig. Alles blijft op dit toestel.</p>
+      </div>
+    </div>
+
+    <!-- ====================== VERKLEEDKAST ====================== -->
+    <div id="wardrobe" class="overlay" aria-hidden="true">
+      <div class="wardrobe-card" role="dialog" aria-label="Hinnik aankleden">
+        <h2 class="settings-title">Kleed Hinnik aan</h2>
+        <div class="wardrobe-preview" id="wardrobe-mascot" aria-hidden="true"></div>
+        <p class="wardrobe-hint">Spaar sterren en geef Hinnik iets leuks!</p>
+        <div class="wardrobe-grid" id="wardrobe-grid"></div>
+        <div class="settings-buttons">
+          <button id="wardrobe-close" class="primary-btn" type="button">Klaar</button>
+        </div>
       </div>
     </div>
 

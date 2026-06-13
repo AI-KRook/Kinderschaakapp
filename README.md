@@ -8,13 +8,15 @@ Geen account, geen reclame, geen tracking. Na de eerste keer laden werkt de app 
 
 - **Hinnik, de pratende mascotte.** Hij is altijd in beeld, legt elke stap hardop uit, beweegt zijn mond terwijl hij praat, juicht bij een goede zet en moedigt zacht aan bij een misser. Met de grote ronde knop met het luidsprekertje (🔊) herhaalt hij de laatste uitleg.
 - **Beeldmenu met iconen** (geen leesmenu) en grote knoppen.
-- **Sterren verzamelen.** Bij de oefeningen verdient het kind sterretjes. De teller op het menu groeit mee, wat uitnodigt om te blijven spelen en lessen te herhalen.
-- **Vijf korte lessen**, in volgorde te doen of los te kiezen:
+- **Sterren verzamelen en Hinnik aankleden.** Bij de oefeningen verdient het kind sterretjes. Tik op de sterrenbalk op het menu om de verkleedkast te openen: met gespaarde sterren verdient het kind hoedjes, een kroon, een bril en meer voor Hinnik, die hij dan overal draagt. Een sterke reden om te blijven spelen.
+- **Zes korte lessen**, in volgorde te doen of los te kiezen:
   1. **Het bord.** Kennismaken met de vakjes.
   2. **De stukken.** Toren, loper, paard, dame, koning en pion, elk met een uitgebreide uitleg (hoe het loopt, sterk of zwak, een leuk weetje) en een sterren-route: het kind verzet het stuk meerdere keren om sterretjes te verzamelen. Veel herhaling, dus het blijft hangen.
   3. **Slaan.** Een stuk van de tegenstander pakken: recht, schuin, en de bijzondere en-passant-slag van de pion.
-  4. **Schaak en mat.** Wat schaak is en hoe je eruit komt, zelf schaak geven, rokeren (kort, lang, en wanneer het niet mag), en meerdere mat-in-één puzzels om zelf op te lossen, met een hint als het lang duurt.
-  5. **Een partijtje.** Een echte partij tegen de computer in vier niveaus, met aanmoediging en feest aan het eind.
+  4. **Schaak en mat.** Wat schaak is en hoe je eruit komt (de drie manieren worden op het bord voorgedaan), zelf schaak geven, rokeren (kort, lang, en wanneer het niet mag), en meerdere mat-in-één puzzels om zelf op te lossen, met een hint als het lang duurt.
+  5. **Puzzels.** Korte tactiek-puzzels met zes verschillende motieven: de dame winnen, een pion promoveren, een vork met het paard, een vork met een pion, en mat in één. Elke puzzel een sterretje.
+  6. **Een partijtje.** Een echte partij tegen de computer. Het kind kiest eerst de kleur (wit of zwart; bij zwart draait het bord om en begint de computer), kiest de moeilijkheid in vier niveaus, en kan altijd om een hint vragen.
+- **Schaak in beeld.** De koning die wordt aangevallen gloeit rood, zodat een kind dat nog niet leest meteen ziet dat de koning gevaar loopt.
 - **Ouder-knop** (het tandwiel ⚙️ linksboven): **houd het ongeveer 1 seconde ingedrukt** om de instellingen te openen. Daar kun je het geluid aan/uit zetten, de spreeksnelheid kiezen, de stem kiezen en de moeilijkheid van de computer in vier niveaus instellen.
 - **Geluidsknop** (🔊) rechtsboven: zet het geluid snel aan of uit. De knop laat duidelijk zien of het geluid aanstaat.
 

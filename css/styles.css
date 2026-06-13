@@ -178,14 +178,40 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 .star-banner {
   display: flex; align-items: center; justify-content: center; gap: 8px;
   margin: 2px 18px 10px;
-  padding: 8px 16px;
+  padding: 10px 16px;
   border-radius: 999px;
   background: linear-gradient(180deg, #fff, #fff4d6);
   box-shadow: var(--shadow-soft);
   font-weight: 800; color: var(--ink); font-size: 16px;
+  width: auto; cursor: pointer;
+  transition: transform .1s ease;
 }
+.star-banner:active { transform: scale(.97); }
 .star-banner-icon { font-size: 22px; display: inline-block; animation: pulse 1.8s ease-in-out infinite; }
 .star-banner #star-count { color: var(--sun-deep); }
+.star-banner-go { margin-left: 6px; font-size: 20px; }
+
+/* ouder-knop verbergt deze niet; hele balk opent de verkleedkast */
+.wardrobe-card {
+  width: 100%; max-width: 420px; text-align: center;
+  background: var(--paper); border-radius: 26px; padding: 22px;
+  box-shadow: var(--shadow); animation: cardIn .25s ease;
+}
+.wardrobe-preview { width: 150px; margin: 0 auto 4px; }
+.wardrobe-hint { font-size: 13px; color: var(--ink-soft); margin: 0 0 6px; }
+.wardrobe-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 10px; }
+.wear-item {
+  position: relative; border-radius: 16px; background: #f4ead7; padding: 10px 6px;
+  font-weight: 800; font-size: 13px; color: var(--ink);
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  transition: transform .1s ease;
+}
+.wear-item:active { transform: scale(.95); }
+.wear-item .wi-emoji { font-size: 26px; line-height: 1; }
+.wear-item.is-on { background: var(--mint); color: #fff; box-shadow: var(--shadow-soft); }
+.wear-item.locked { opacity: .55; }
+.wear-item .wi-cost { font-size: 12px; color: var(--sun-deep); font-weight: 800; }
+.wear-item.is-on .wi-cost { color: #fff; }
 .menu-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -488,6 +514,15 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 }
 .mascot-svg.nudge .mascot-body { animation: nudge .7s ease both; }
 @keyframes nudge { 0%,100%{transform:rotate(0);} 30%{transform:rotate(-7deg);} 60%{transform:rotate(5deg);} }
+
+/* accessoires: standaard verborgen, alleen de gekozen verschijnt */
+.mascot-svg .acc { display: none; }
+.mascot-svg.wear-kroon .acc-kroon,
+.mascot-svg.wear-strik .acc-strik,
+.mascot-svg.wear-bril .acc-bril,
+.mascot-svg.wear-feesthoed .acc-feesthoed,
+.mascot-svg.wear-bloem .acc-bloem,
+.mascot-svg.wear-toverhoed .acc-toverhoed { display: block; }
 
 .mascot-svg .m-spark { opacity: 0; transform-box: fill-box; transform-origin: center; }
 .mascot-svg.cheer .m-spark { animation: spark .7s ease both; }
