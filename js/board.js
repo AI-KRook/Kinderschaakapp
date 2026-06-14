@@ -202,7 +202,11 @@
     el.style.transform = this._transformFor(square);
     var g = document.createElement("span");
     g.className = "piece-glyph";
-    g.textContent = GLYPH[type];
+    var img = document.createElement("img");
+    img.src = "pieces/" + (color === "w" ? "w" : "b") + type + ".png";
+    img.alt = "";
+    img.draggable = false;
+    g.appendChild(img);
     el.appendChild(g);
     this.piecesLayer.appendChild(el);
     this.pieceEls[square] = el;
@@ -468,7 +472,7 @@
       var b = document.createElement("button");
       b.type = "button";
       b.className = "promo-btn " + colorClass;
-      b.innerHTML = '<span class="piece-glyph">' + GLYPH[t] + '</span>';
+      b.innerHTML = '<span class="piece-glyph"><img src="pieces/' + (color === "w" ? "w" : "b") + t + '.png" alt=""></span>';
       b.addEventListener("click", function (ev) {
         ev.stopPropagation();
         if (!self._awaitingPromo) return;
@@ -508,10 +512,10 @@
     el.style.transform = this._transformFor(move.to);
     this.pieceEls[move.to] = el;
 
-    // promotie: maak er een dame van
+    // promotie: wissel de afbeelding naar het gekozen stuk
     if (move.promotion) {
-      var g = el.querySelector(".piece-glyph");
-      if (g) g.textContent = GLYPH[move.promotion];
+      var pImg = el.querySelector(".piece-glyph img");
+      if (pImg) pImg.src = "pieces/" + (el.classList.contains("white") ? "w" : "b") + move.promotion + ".png";
     }
     // klein 'plop'-effect bij aankomst
     var self = this;
