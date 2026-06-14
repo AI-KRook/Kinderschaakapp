@@ -162,6 +162,7 @@
 
   Mascotte.prototype.cheer = function () {
     var self = this;
+    if (window.Snd) Snd.effect("goed");
     if (this._cheerTimer) clearTimeout(this._cheerTimer);
     this._eachSvg(function (svg) { svg.classList.remove("cheer"); void svg.offsetWidth; svg.classList.add("cheer"); });
     this._cheerTimer = setTimeout(function () {

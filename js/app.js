@@ -6,7 +6,7 @@
   "use strict";
 
   var App = {
-    settings: { sound: true, recorded: true, voicePack: "fenna", rate: 1.0, difficulty: 1, voiceURI: null },
+    settings: { sound: true, recorded: true, music: true, voicePack: "fenna", rate: 1.0, difficulty: 1, voiceURI: null },
     progress: {},
     _runToken: 0,
     _run: null
@@ -31,6 +31,7 @@
     App.progress.stars = (App.progress.stars || 0) + 1;
     saveProgress();
     updateStarCount();
+    if (window.Snd) Snd.effect("ster");
     // net genoeg sterren voor een nieuw verkleedspulletje? vier het!
     if (typeof OUTFITS !== "undefined" && OUTFITS.some(function (o) { return o.cost === App.progress.stars; })) {
       celebrate();
@@ -297,6 +298,7 @@
 
   /* ---------- feest / confetti ---------- */
   function celebrate() {
+    if (window.Snd) Snd.effect("win");
     var layer = $("board-confetti");
     if (!layer) return;
     var colors = ["#ff7a59", "#ffcf5c", "#7fd1a6", "#9b7ede", "#5cb8ff", "#ff9ec7"];
@@ -325,6 +327,7 @@
   function setSound(on) {
     App.settings.sound = !!on;
     Speech.setEnabled(App.settings.sound);
+    if (window.Snd) Snd.setFx(App.settings.sound);
     refreshSoundUI();
     saveSettings();
   }
@@ -340,6 +343,7 @@
     populateVoicePacks();
     $("set-rate").value = App.settings.rate;
     $("set-recorded").setAttribute("aria-pressed", String(App.settings.recorded !== false));
+    $("set-music").setAttribute("aria-pressed", String(App.settings.music !== false));
     refreshSoundUI();
     refreshDifficultyUI();
     $("settings").classList.add("is-open");
@@ -465,6 +469,13 @@
       setSound(!App.settings.sound);
       if (App.settings.sound) Speech.preview("Het geluid staat weer aan!");
     });
+    $("set-music").addEventListener("click", function () {
+      var on = !(App.settings.music !== false);
+      App.settings.music = on;
+      if (window.Snd) Snd.setMusic(on);
+      $("set-music").setAttribute("aria-pressed", String(on));
+      saveSettings();
+    });
     $("set-recorded").addEventListener("click", function () {
       App.settings.recorded = !App.settings.recorded;
       Speech.setUseRecorded(App.settings.recorded);
@@ -517,6 +528,7 @@
     Speech.unlock();
     Speech.setEnabled(App.settings.sound);
     Speech.setRate(App.settings.rate);
+    if (window.Snd) { Snd.unlock(); Snd.setFx(App.settings.sound); Snd.setMusic(App.settings.music !== false); }
     showScreen("menu");
     buildMenu();
     // korte testzin: ontgrendelt en verwelkomt

@@ -436,6 +436,7 @@
   Board.prototype._commitMove = function (from, to, byUser, promotion) {
     var move = this.game.move({ from: from, to: to, promotion: promotion || "q" });
     if (!move) { this.clearSelection(); return null; }
+    if (window.Snd) Snd.effect("zet");
     this.clearSelection();
     this._animateMove(move);
     this.clearHighlights();
