@@ -25,10 +25,19 @@ os.makedirs(AUDIO, exist_ok=True)
 
 PRAISE = ["Hoera!", "Wauw, knap!", "Helemaal goed!", "Top gedaan!", "Jaaa!", "Wat goed van jou!", "Super gedaan!", "Petje af!"]
 TRY_AGAIN = [
-    "Bijna! Probeer het nog eens, je kan het!",
-    "Oei, net niet. Nog een keertje!",
-    "Geeft niks! Probeer maar opnieuw.",
-    "Nog een poging, jij kan dit!",
+    "Bijna! Kijk waar het handje wijst.",
+    "Oei, net niet. Volg het handje maar.",
+    "Nog een keertje! Het handje wijst de weg.",
+    "Probeer het nog eens, naar het vakje met het handje.",
+]
+# gerichte foutfeedback per stuk (module 2)
+PIECE_MIS = [
+    "De toren gaat rechtdoor. Schuif hem naar de ster!",
+    "De loper gaat schuin. Schuif hem naar de ster!",
+    "Het paard springt in een L. Spring naar de ster!",
+    "De dame mag alle kanten op. Ga naar de ster!",
+    "De koning zet één stapje. Ga naar de ster!",
+    "De pion stapt vooruit. Ga naar de ster!",
 ]
 
 PHRASES = [
@@ -86,14 +95,14 @@ PHRASES = [
     "Dit was nog geen mat, want de koning kon nog weglopen. Maar goed gedaan, hoor!",
     # rokeren
     "Nu een slimme truc om je koning veilig te zetten. Het heet rokeren.",
-    "De koning en de toren bewegen samen, in één keer. De koning springt twee vakjes opzij, en de toren springt aan de andere kant naast hem.",
+    "De koning en de toren bewegen samen. De koning springt twee vakjes opzij, de toren komt ernaast.",
     "Zo zit je koning lekker veilig in een hoekje, met de toren ervoor.",
     "Doe de korte rokade. Tik op de koning, en zet hem twee vakjes naar rechts.",
     "Knap! Je koning staat nu veilig in het hoekje.",
     "En nu de lange rokade. Tik op de koning, en zet hem twee vakjes naar links.",
     "Allebei gelukt! Nu ken je de korte en de lange rokade.",
     "Maar let op, rokeren mag niet altijd!",
-    "Zie je die zwarte toren? De koning zou er vlak langs lopen. Door het gevaar heen rokeren mag niet. En ook niet als je koning al schaak staat.",
+    "Zie je die zwarte toren? De koning zou er vlak langs lopen. Door gevaar rokeren mag niet.",
     # mat-in-één oefenen
     "Nu gaan we matzetten oefenen. Klaar voor de eerste?",
     "Zet de zwarte koning schaakmat! Schuif je toren naar boven, vlak naast de koning.",
@@ -202,6 +211,7 @@ PHRASES = [
 for p in PRAISE:
     PHRASES.append(p + " Je hebt alle sterretjes!")
 PHRASES.extend(TRY_AGAIN)
+PHRASES.extend(PIECE_MIS)
 
 
 # Uitspraak-correcties: de stem negeert klemtoontekens, dus sommige woorden

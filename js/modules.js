@@ -10,10 +10,10 @@
 
   var PRAISE = ["Hoera!", "Wauw, knap!", "Helemaal goed!", "Top gedaan!", "Jaaa!", "Wat goed van jou!", "Super gedaan!", "Petje af!"];
   var TRY_AGAIN = [
-    "Bijna! Probeer het nog eens, je kan het!",
-    "Oei, net niet. Nog een keertje!",
-    "Geeft niks! Probeer maar opnieuw.",
-    "Nog een poging, jij kan dit!"
+    "Bijna! Kijk waar het handje wijst.",
+    "Oei, net niet. Volg het handje maar.",
+    "Nog een keertje! Het handje wijst de weg.",
+    "Probeer het nog eens, naar het vakje met het handje."
   ];
   var COUNT = ["Eén ster!", "Twee sterren!", "Drie sterren!", "Vier sterren!"];
   var SLAGEN = ["Hebbes! Lekker geslagen!", "Boem! Mooi gepakt!", "Ja! Dat ging knap!"];
@@ -43,17 +43,23 @@
   /* ============================ MODULE 2: DE STUKKEN ============================ */
   var PIECES = [
     { type: "r", naam: "de toren", start: "a1", path: ["a5", "f5", "f2"],
-      uitleg: "Dit is de toren. Hij gaat rechtdoor: vooruit, achteruit of opzij. Maar nooit schuin." },
+      uitleg: "Dit is de toren. Hij gaat rechtdoor: vooruit, achteruit of opzij. Maar nooit schuin.",
+      mis: "De toren gaat rechtdoor. Schuif hem naar de ster!" },
     { type: "b", naam: "de loper", start: "c1", path: ["h6", "f8", "a3"],
-      uitleg: "Dit is de loper. Hij gaat altijd schuin, en blijft op zijn eigen kleur." },
+      uitleg: "Dit is de loper. Hij gaat altijd schuin, en blijft op zijn eigen kleur.",
+      mis: "De loper gaat schuin. Schuif hem naar de ster!" },
     { type: "n", naam: "het paard", start: "d4", path: ["f5", "d6", "b5"],
-      uitleg: "Dit is het paard, dat ben ik! Ik spring in een L, en mag over andere stukken heen." },
+      uitleg: "Dit is het paard, dat ben ik! Ik spring in een L, en mag over andere stukken heen.",
+      mis: "Het paard springt in een L. Spring naar de ster!" },
     { type: "q", naam: "de dame", start: "d1", path: ["d4", "a7", "a1"],
-      uitleg: "Dit is de dame, het sterkste stuk. Zij mag alle kanten op, recht en schuin." },
+      uitleg: "Dit is de dame, het sterkste stuk. Zij mag alle kanten op, recht en schuin.",
+      mis: "De dame mag alle kanten op. Ga naar de ster!" },
     { type: "k", naam: "de koning", start: "e4", path: ["e5", "d6", "c5"],
-      uitleg: "Dit is de koning, de baas. Hij zet maar één stapje tegelijk. Pas goed op hem!" },
+      uitleg: "Dit is de koning, de baas. Hij zet maar één stapje tegelijk. Pas goed op hem!",
+      mis: "De koning zet één stapje. Ga naar de ster!" },
     { type: "p", naam: "de pion", start: "e2", path: ["e4", "e5", "e6"],
-      uitleg: "Dit is de pion. Hij stapt vooruit, eentje tegelijk. Aan de overkant wordt hij een dame!" }
+      uitleg: "Dit is de pion. Hij stapt vooruit, eentje tegelijk. Aan de overkant wordt hij een dame!",
+      mis: "De pion stapt vooruit. Ga naar de ster!" }
   ];
 
   async function teachPiece(L, def, first) {
@@ -85,7 +91,7 @@
           if (i < def.path.length - 1) L.blurt(COUNT[i] || "Hebbes!");
           break;
         } else {
-          await L.say(pick(TRY_AGAIN));
+          await L.say(def.mis);
           L.board.undoLast();
           L.board.setMode("move");
           L.board.setMovable("w");
@@ -330,7 +336,7 @@
     L.board.setFEN(ROK_KORT);
     L.board.setMode("locked");
     await L.say("Nu een slimme truc om je koning veilig te zetten. Het heet rokeren.");
-    await L.say("De koning en de toren bewegen samen, in één keer. De koning springt twee vakjes opzij, en de toren springt aan de andere kant naast hem.");
+    await L.say("De koning en de toren bewegen samen. De koning springt twee vakjes opzij, de toren komt ernaast.");
     await L.say("Zo zit je koning lekker veilig in een hoekje, met de toren ervoor.");
 
     await castleOnce(L, ROK_KORT, "k", "Doe de korte rokade. Tik op de koning, en zet hem twee vakjes naar rechts.");
@@ -343,7 +349,7 @@
     L.board.setMode("locked");
     await L.say("Maar let op, rokeren mag niet altijd!");
     L.point("f8");
-    await L.say("Zie je die zwarte toren? De koning zou er vlak langs lopen. Door het gevaar heen rokeren mag niet. En ook niet als je koning al schaak staat.");
+    await L.say("Zie je die zwarte toren? De koning zou er vlak langs lopen. Door gevaar rokeren mag niet.");
     L.unpoint();
     await L.wait(300);
   }

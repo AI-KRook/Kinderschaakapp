@@ -31,6 +31,31 @@
     return null;
   }
 
+  // niveau 1: zwak maar verstandig. Kiest zetten die niets gratis weggeven en
+  // geeft rustige (niet-slaande) zetten de voorkeur, zodat het kind makkelijk
+  // wint en het spel logisch oogt. Staat de bot zelf schaak, dan reageert hij
+  // wel verstandig (de aanvaller slaan of de koning veilig zetten).
+  function chooseLevel1(game) {
+    var moves = game.moves({ verbose: true });
+    if (!moves.length) return null;
+    var scored = moves.map(function (m) {
+      game.move(m);
+      var threat = 0;
+      game.moves({ verbose: true }).forEach(function (r) {
+        var c = r.captured ? (VALUE[r.captured] || 0) : 0;
+        if (c > threat) threat = c;
+      });
+      game.undo();
+      // risico (wat de tegenstander hierna gratis kan pakken) + kleine voorkeur
+      // voor rustige zetten, zodat de bot niet zomaar stukken van het kind pakt.
+      return { m: m, score: threat + (m.captured ? 0.3 : 0) };
+    });
+    var min = Infinity;
+    scored.forEach(function (s) { if (s.score < min) min = s.score; });
+    var best = scored.filter(function (s) { return s.score === min; }).map(function (s) { return s.m; });
+    return pickRandom(best);
+  }
+
   // niveau 2: mat, anders soms gratis materiaal, anders rustig willekeurig
   function chooseLevel2(game) {
     var moves = game.moves({ verbose: true });
@@ -97,8 +122,7 @@
     if (level >= 4) return chooseLevel4(game);
     if (level === 3) return Promise.resolve(chooseLevel3(game));
     if (level === 2) return Promise.resolve(chooseLevel2(game));
-    var moves = game.moves({ verbose: true });
-    return Promise.resolve(moves.length ? pickRandom(moves) : null);
+    return Promise.resolve(chooseLevel1(game));
   }
 
   window.Bot = { chooseMove: chooseMove };
