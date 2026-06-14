@@ -153,6 +153,20 @@ PHRASES = [
     "Een tipje: zet je dame naast de zwarte koning.",
     "Schaakmat! Vlak naast de koning. Wat ben jij sterk!",
     "Knap! Jij kan nu de koning matzetten. Zo win je een potje!",
+    # vernieuwde tactiek-puzzels (met de naam van de truc)
+    "De vork! Zet je paard op het vakje dat oplicht. Dan val je de koning en de dame samen aan.",
+    "De penning! Het zwarte paard zit vast voor de koning, het mag niet weg. Pak het met je pion!",
+    "De spies! Val de koning aan met je toren. Hij moet opzij, en dan pak jij de dame erachter.",
+    "Het aftrekschaak! Haal je paard weg, en de toren erachter geeft schaak. Pak meteen de dame!",
+    # vernieuwd eindspel (oppositie en koningstechniek, geen mat)
+    "Welkom bij het eindspel! Er staan nog maar weinig stukken. Nu komt het op je koning aan.",
+    "Eerst de oppositie. Zet je koning recht tegenover de zwarte koning, met één vakje ertussen. Dan moet hij wijken.",
+    "Knap! Nu heb jij de oppositie. Kijk, de zwarte koning moet opzij.",
+    "In het eindspel is je koning juist sterk. Loop er dapper mee naar voren!",
+    "Goed zo! Een sterke koning helpt je winnen.",
+    "En nu het mooiste: breng de pion naar de overkant. Je koning beschermt hem.",
+    "De pion is een dame geworden! Zo win je een eindspel.",
+    "Knap! Je weet nu hoe je het eindspel speelt: met je koning en de oppositie.",
     # module 5: een partijtje
     "Met welke stukken wil je spelen? Wit of zwart?",
     "Nu gaan we een echt partijtje spelen! Jij speelt met de witte stukken, ik met de zwarte.",

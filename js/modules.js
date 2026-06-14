@@ -547,70 +547,45 @@
   }
 
   /* ============================ MODULE: PUZZELS (TACTIEK) ============================ */
-  // Korte één-zet-puzzels met zes verschillende motieven. Alle standen vooraf
-  // in chess.js gecontroleerd. Types: capture, promo, fork, mate.
+  // Vijf duidelijk verschillende tactieken (geen mat, geen dubbele). Alle
+  // standen vooraf in chess.js gecontroleerd. Types: capture, fork, skewer.
   var PUZZLES = [
-    // 1. de dame winnen (gratis stuk)
+    // gratis stuk: pak de onverdedigde dame met de toren
     { type: "capture", only: "d1", point: "d6", target: "d6",
       pieces: [{ type: "k", color: "w", square: "g1" }, { type: "r", color: "w", square: "d1" },
                { type: "k", color: "b", square: "h8" }, { type: "q", color: "b", square: "d6" }],
       zeg: "Pak de zwarte dame! Ze staat helemaal alleen, niemand verdedigt haar.",
       hint: "Tik op je toren en pak de dame die oplicht." },
-    // 2. een pion promoveren
-    { type: "promo", only: "b7", point: "b8",
-      pieces: [{ type: "k", color: "w", square: "h1" }, { type: "p", color: "w", square: "b7" },
-               { type: "k", color: "b", square: "e4" }],
-      zeg: "Breng je pion naar de overkant. Dan wordt hij een dame!",
-      hint: "Tik op je pion en zet hem helemaal naar boven." },
-    // 3. vork met het paard (koning + dame)
+    // vork: het paard valt de koning en de dame tegelijk aan
     { type: "fork", only: "b5", point: "c7", target: "c7",
       pieces: [{ type: "k", color: "w", square: "h1" }, { type: "n", color: "w", square: "b5" },
                { type: "k", color: "b", square: "a8" }, { type: "q", color: "b", square: "e8" }],
-      zeg: "Zet je paard op het vakje dat oplicht. Dan val je de koning en de dame samen aan!",
-      hint: "Zet je paard op het paarse vakje." },
-    // 4. vork met een pion (twee paarden)
-    { type: "fork", only: "e4", point: "e5", target: "e5",
-      pieces: [{ type: "k", color: "w", square: "e1" }, { type: "p", color: "w", square: "e4" },
-               { type: "k", color: "b", square: "h8" }, { type: "n", color: "b", square: "d6" },
-               { type: "n", color: "b", square: "f6" }],
-      zeg: "Ook een pion kan vorken! Zet je pion vooruit, op het vakje dat oplicht. Hij valt dan twee paarden tegelijk aan.",
-      hint: "Zet je pion een stapje vooruit, op het paarse vakje." },
-    // 5. mat met de toren (achterste rij)
-    { type: "mate", only: "a1", point: "a8",
-      pieces: [{ type: "k", color: "b", square: "g8" }, { type: "p", color: "b", square: "f7" },
-               { type: "p", color: "b", square: "g7" }, { type: "p", color: "b", square: "h7" },
-               { type: "r", color: "w", square: "a1" }, { type: "k", color: "w", square: "e1" }],
-      zeg: "Zet de zwarte koning schaakmat! Schuif je toren naar boven, vlak naast de koning.",
-      hint: "Een tipje: schuif je toren helemaal naar boven, naast de koning." },
-    // 6. mat met de dame (naast de koning, gedekt door de eigen koning)
-    { type: "mate", only: "a7", point: "h7",
-      pieces: [{ type: "k", color: "b", square: "h8" }, { type: "k", color: "w", square: "g6" },
-               { type: "q", color: "w", square: "a7" }],
-      zeg: "De laatste! Zet je dame vlak naast de koning. Jouw koning past op haar.",
-      hint: "Een tipje: zet je dame naast de zwarte koning, op de bovenste rij." },
-    // 7. penning: het gepende paard pakken (het mag niet weg)
+      zeg: "De vork! Zet je paard op het vakje dat oplicht. Dan val je de koning en de dame samen aan.",
+      hint: "Zet je paard op het paarse vakje.",
+      gelukt: "Een vork! Allebei tegelijk! Wat ben jij slim." },
+    // penning: het gepende paard mag niet weg, pak het met de pion
     { type: "capture", only: "d4", point: "e5", target: "e5",
       pieces: [{ type: "k", color: "b", square: "e8" }, { type: "n", color: "b", square: "e5" },
                { type: "r", color: "w", square: "e1" }, { type: "p", color: "w", square: "d4" },
                { type: "k", color: "w", square: "h1" }],
-      zeg: "Het zwarte paard zit vast voor de koning, het mag niet weg. Pak het met je pion!",
+      zeg: "De penning! Het zwarte paard zit vast voor de koning, het mag niet weg. Pak het met je pion!",
       hint: "Tik op je pion en sla het paard schuin.",
       gelukt: "Knap! Het paard zat vast en jij pakte het." },
-    // 8. aftrekschaak: paard weg, de toren erachter geeft schaak, en pak de dame
+    // spies: de koning staat ervoor, win de dame erachter
+    { type: "skewer", only: "h1", point: "a1", target: "a1",
+      pieces: [{ type: "k", color: "b", square: "a4" }, { type: "q", color: "b", square: "a7" },
+               { type: "r", color: "w", square: "h1" }, { type: "k", color: "w", square: "h8" }],
+      zeg: "De spies! Val de koning aan met je toren. Hij moet opzij, en dan pak jij de dame erachter.",
+      hint: "Zet je toren op het paarse vakje, onder de koning.",
+      gelukt: "Een spies! Eerst de koning, dan de dame. Wat ben jij slim!" },
+    // aftrekschaak: haal het paard weg, de toren erachter geeft schaak, win de dame
     { type: "capture", only: "e4", point: "c5", target: "c5",
       pieces: [{ type: "k", color: "b", square: "e8" }, { type: "q", color: "b", square: "c5" },
                { type: "r", color: "w", square: "e1" }, { type: "n", color: "w", square: "e4" },
                { type: "k", color: "w", square: "h1" }],
-      zeg: "Een toverzet! Haal je paard weg, en de toren erachter geeft schaak. Pak meteen de dame!",
+      zeg: "Het aftrekschaak! Haal je paard weg, en de toren erachter geeft schaak. Pak meteen de dame!",
       hint: "Zet je paard op de dame. Dan geeft de toren erachter schaak.",
-      gelukt: "Aftrekschaak! De toren geeft schaak en jij wint de dame. Super slim!" },
-    // 9. spies: koning voor, dame erachter
-    { type: "skewer", only: "h1", point: "a1", target: "a1",
-      pieces: [{ type: "k", color: "b", square: "a4" }, { type: "q", color: "b", square: "a7" },
-               { type: "r", color: "w", square: "h1" }, { type: "k", color: "w", square: "h8" }],
-      zeg: "Een spies! Val de koning aan met je toren. Hij moet opzij, en dan pak jij de dame erachter.",
-      hint: "Zet je toren op het paarse vakje, onder de koning.",
-      gelukt: "Een spies! Eerst de koning, dan de dame. Wat ben jij slim!" }
+      gelukt: "Aftrekschaak! De toren geeft schaak en jij wint de dame. Super slim!" }
   ];
 
   function setupPuzzle(L, def) {
@@ -656,18 +631,12 @@
 
   async function modulePuzzles(L) {
     await L.say("Welkom bij de puzzels! Hier word jij een echte schaakbaas. Klaar?", { mood: "happy" });
-    await puzzleSolve(L, PUZZLES[0]); await L.wait(300); // dame winnen
-    await puzzleSolve(L, PUZZLES[1]); await L.wait(300); // promotie
-    await L.say("Nu de vork! Eén stuk dat er twee tegelijk aanvalt. Heel slim.");
-    await puzzleSolve(L, PUZZLES[2]); await L.wait(300); // paard-vork
-    await puzzleSolve(L, PUZZLES[3]); await L.wait(300); // pion-vork
+    await puzzleSolve(L, PUZZLES[0]); await L.wait(300); // gratis stuk
+    await puzzleSolve(L, PUZZLES[1]); await L.wait(300); // vork
     await L.say("Nu wat moeilijkere trucs! Goed opletten.");
-    await puzzleSolve(L, PUZZLES[6]); await L.wait(300); // penning
-    await puzzleSolve(L, PUZZLES[7]); await L.wait(300); // aftrekschaak
-    await puzzleSolve(L, PUZZLES[8]); await L.wait(300); // spies
-    await L.say("En nu het mooiste: zet mat in één!");
-    await puzzleSolve(L, PUZZLES[4]); await L.wait(300); // toren-mat
-    await puzzleSolve(L, PUZZLES[5]); await L.wait(300); // dame-mat
+    await puzzleSolve(L, PUZZLES[2]); await L.wait(300); // penning
+    await puzzleSolve(L, PUZZLES[3]); await L.wait(300); // spies
+    await puzzleSolve(L, PUZZLES[4]); await L.wait(300); // aftrekschaak
     L.board.clearGoals();
     L.celebrate();
     await L.say("Wauw! Jij bent een echte puzzelkampioen. Knap hoor!", { mood: "happy" });
@@ -731,39 +700,75 @@
   }
 
   /* ============================ MODULE: HET EINDSPEL ============================ */
-  // Maak-het-af: begeleide standen waar het kind de koning matzet (mat in één),
-  // met de eigen koning als hulp. Hergebruikt puzzleSolve (type "mate").
-  var ENDGAME = [
-    { type: "mate", only: "d1", point: "d8",
-      pieces: [{ type: "k", color: "b", square: "h8" }, { type: "k", color: "w", square: "g6" },
-               { type: "q", color: "w", square: "d1" }],
-      zeg: "Zet de zwarte koning mat met je dame. Schuif haar naar de bovenste rij.",
-      hint: "Een tipje: zet je dame helemaal naar boven, op het rijtje van de koning.",
-      gelukt: "Schaakmat! Je dame en je koning werkten samen. Knap!" },
-    { type: "mate", only: "h1", point: "h8",
-      pieces: [{ type: "k", color: "b", square: "a8" }, { type: "k", color: "w", square: "b6" },
-               { type: "r", color: "w", square: "h1" }],
-      zeg: "En nu met de toren! Schuif hem naar de bovenste rij, naast de koning.",
-      hint: "Een tipje: zet je toren helemaal naar boven.",
-      gelukt: "Schaakmat met de toren! Super!" },
-    { type: "mate", only: "a7", point: "g7",
-      pieces: [{ type: "k", color: "b", square: "h8" }, { type: "k", color: "w", square: "g6" },
-               { type: "q", color: "w", square: "a7" }],
-      zeg: "Nog eentje. Zet je dame vlak naast de koning. Jouw koning past op haar.",
-      hint: "Een tipje: zet je dame naast de zwarte koning.",
-      gelukt: "Schaakmat! Vlak naast de koning. Wat ben jij sterk!" }
-  ];
-
+  // Echte eindspeltechniek (geen matzetten): de oppositie, een actieve koning,
+  // en een pion naar de overkant brengen. Alle standen vooraf gecontroleerd.
   async function moduleEndgame(L) {
-    await L.say("Welkom bij het eindspel! Nu zijn er nog maar weinig stukken over. Jij moet de koning van de ander matzetten.", { mood: "happy" });
-    await L.say("De truc: jaag de koning naar de rand, en zet hem dan mat. Je eigen koning helpt mee.");
-    for (var i = 0; i < ENDGAME.length; i++) {
-      await puzzleSolve(L, ENDGAME[i]);
-      await L.wait(400);
+    // begeleid één koningszet: alleen 'only' beweegbaar, doelvakje 'target'
+    async function kingTo(only, target) {
+      function setup() {
+        L.board.setMode("move");
+        L.board.setMovable(function (sq) { return sq === only; });
+        L.board.showHintFrom(target);
+        L.point(target);
+      }
+      setup();
+      while (true) {
+        var mv = await L.waitMove();
+        if (mv.to === target) { L.unpoint(); L.cheer(); L.star(); return; }
+        await L.say(pick(TRY_AGAIN));
+        L.board.undoLast();
+        setup();
+      }
     }
+
+    await L.say("Welkom bij het eindspel! Er staan nog maar weinig stukken. Nu komt het op je koning aan.", { mood: "happy" });
+
+    // 1) OPPOSITIE
+    L.board.setupCustom([
+      { type: "k", color: "b", square: "d6" }, { type: "k", color: "w", square: "c4" },
+      { type: "p", color: "w", square: "c2" }
+    ], "w");
+    await L.say("Eerst de oppositie. Zet je koning recht tegenover de zwarte koning, met één vakje ertussen. Dan moet hij wijken.", { mood: "think" });
+    await kingTo("c4", "d4");
+    await L.say("Knap! Nu heb jij de oppositie. Kijk, de zwarte koning moet opzij.", { mood: "happy" });
+    await L.wait(300);
+    L.board.move("d6", "e6"); // zwart moet wijken
+    await L.wait(800);
+
+    // 2) ACTIEVE KONING
+    L.board.setupCustom([
+      { type: "k", color: "w", square: "d4" }, { type: "k", color: "b", square: "f6" },
+      { type: "p", color: "w", square: "d3" }
+    ], "w");
+    await L.say("In het eindspel is je koning juist sterk. Loop er dapper mee naar voren!", { mood: "think" });
+    await kingTo("d4", "d5");
+    await L.say("Goed zo! Een sterke koning helpt je winnen.");
+    await L.wait(300);
+
+    // 3) DE PION NAAR DE OVERKANT
+    L.board.setupCustom([
+      { type: "k", color: "w", square: "g7" }, { type: "p", color: "w", square: "h7" },
+      { type: "k", color: "b", square: "a1" }
+    ], "w");
+    L.board.setMode("move");
+    L.board.setMovable(function (sq) { return sq === "h7"; });
+    L.board.showHintFrom("h8");
+    L.point("h8");
+    await L.say("En nu het mooiste: breng de pion naar de overkant. Je koning beschermt hem.", { mood: "think" });
+    while (true) {
+      var mv = await L.waitMove();
+      if (mv.flags && mv.flags.indexOf("p") >= 0) { L.unpoint(); L.cheer(); L.star(); break; }
+      await L.say(pick(TRY_AGAIN));
+      L.board.undoLast();
+      L.board.setMode("move");
+      L.board.setMovable(function (sq) { return sq === "h7"; });
+      L.board.showHintFrom("h8");
+      L.point("h8");
+    }
+    await L.say("De pion is een dame geworden! Zo win je een eindspel.", { mood: "happy" });
     L.board.clearGoals();
     L.celebrate();
-    await L.say("Knap! Jij kan nu de koning matzetten. Zo win je een potje!", { mood: "happy" });
+    await L.say("Knap! Je weet nu hoe je het eindspel speelt: met je koning en de oppositie.", { mood: "happy" });
     L.done();
   }
 
