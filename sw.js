@@ -1,9 +1,10 @@
 /* =================================================================
    Service worker — maakt de app offline bruikbaar.
-   Cachet alle app-bestanden bij de installatie en serveert ze daarna
-   uit de cache (cache-first). Verhoog CACHE bij elke nieuwe versie.
+   Bij de installatie wordt alleen de app-schil opgeslagen (snel en robuust);
+   de geluidsfragmenten worden vanzelf bewaard zodra ze voor het eerst klinken
+   (cache-first met lui opslaan). Verhoog CACHE bij elke nieuwe versie.
    ================================================================= */
-var CACHE = "hinnik-schaak-v28";
+var CACHE = "hinnik-schaak-v29";
 
 var ASSETS = [
   "./",
@@ -30,26 +31,19 @@ var ASSETS = [
   "icons/icon-512-maskable.png",
   "icons/apple-touch-icon.png",
   "audio/voices.json",
+  "audio/fenna/manifest.json",
+  "audio/maarten/manifest.json",
   "audio/_silent.wav"
 ];
 
 self.addEventListener("install", function (e) {
+  // alleen de app-schil + de manifests vooraf opslaan. De mp3's worden vanzelf
+  // bewaard zodra ze voor het eerst klinken (zie de fetch-handler hieronder).
   e.waitUntil(
     caches.open(CACHE).then(function (cache) {
       return Promise.all(ASSETS.map(function (url) {
         return cache.add(url).catch(function () {});
-      })).then(function () {
-        // alle opgenomen mp3's van elke stem meecachen (offline gebruik)
-        return fetch("audio/voices.json").then(function (r) { return r.json(); }).then(function (voices) {
-          return Promise.all((voices || []).map(function (v) {
-            var dir = "audio/" + v.dir + "/";
-            return fetch(dir + "manifest.json").then(function (r) { return r.json(); }).then(function (map) {
-              var files = [dir + "manifest.json"].concat(Object.keys(map).map(function (k) { return dir + map[k]; }));
-              return Promise.all(files.map(function (u) { return cache.add(u).catch(function () {}); }));
-            }).catch(function () {});
-          }));
-        }).catch(function () {});
-      });
+      }));
     }).then(function () { return self.skipWaiting(); })
   );
 });

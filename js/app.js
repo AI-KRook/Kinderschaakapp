@@ -184,6 +184,26 @@
       grid.appendChild(node);
     });
     updateStarCount();
+    // naar de huidige halte scrollen, zodat het kind ziet waar het gebleven is
+    if (currentIdx >= 2) {
+      var cur = grid.querySelector(".path-node.current");
+      if (cur) requestAnimationFrame(function () {
+        try { cur.scrollIntoView({ behavior: "smooth", block: "center" }); } catch (e) { cur.scrollIntoView(); }
+      });
+    }
+    maybeShowParentHint();
+  }
+
+  // eenmalige hint voor de ouder (waar de instellingen zitten)
+  function maybeShowParentHint() {
+    var el = $("parent-hint");
+    if (!el) return;
+    var seen = false;
+    try { seen = localStorage.getItem("hinnik_parenthint") === "1"; } catch (e) {}
+    if (seen) { el.classList.add("hidden"); return; }
+    el.classList.remove("hidden");
+    try { localStorage.setItem("hinnik_parenthint", "1"); } catch (e) {}
+    setTimeout(function () { el.classList.add("hidden"); }, 8000);
   }
 
   /* ---------- de "L"-helper voor modules (met netjes afbreken) ---------- */
@@ -459,6 +479,8 @@
     $("set-parentinfo").addEventListener("click", openParentInfo);
     $("parentinfo-close").addEventListener("click", closeParentInfo);
     $("parentinfo").addEventListener("click", function (e) { if (e.target === $("parentinfo")) closeParentInfo(); });
+
+    $("parent-hint").addEventListener("click", function () { this.classList.add("hidden"); });
 
     setupParentButton();
 
