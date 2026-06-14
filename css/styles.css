@@ -3,6 +3,20 @@
    Kindvriendelijke, warme, speelse stijl. Portret-eerst (iPhone).
    ================================================================= */
 
+/* Vriendelijk, rond kinderlettertype (offline meegeleverd, SIL OFL). */
+@font-face {
+  font-family: "Fredoka"; font-style: normal; font-weight: 400; font-display: swap;
+  src: url("../fonts/fredoka-400.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Fredoka"; font-style: normal; font-weight: 600; font-display: swap;
+  src: url("../fonts/fredoka-600.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Fredoka"; font-style: normal; font-weight: 700; font-display: swap;
+  src: url("../fonts/fredoka-700.woff2") format("woff2");
+}
+
 :root {
   /* Warme, vrolijke maar rustige kleuren */
   --sky-top: #bfe9ff;
@@ -29,7 +43,7 @@
   --shadow: 0 10px 24px rgba(74, 53, 34, .18);
   --shadow-soft: 0 4px 12px rgba(74, 53, 34, .14);
 
-  --font-display: ui-rounded, "SF Pro Rounded", "Baloo 2", "Quicksand", "Comic Sans MS", system-ui, sans-serif;
+  --font-display: "Fredoka", ui-rounded, "SF Pro Rounded", "Quicksand", system-ui, sans-serif;
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
 }

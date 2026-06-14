@@ -197,6 +197,7 @@ PHRASES = [
     # verkleedkast
     "Kijk eens, wat zie ik er mooi uit!",
     "Spaar nog meer sterren, dan mag je deze op!",
+    "Hoera! Je hebt iets nieuws verdiend voor de verkleedkast!",
 ]
 for p in PRAISE:
     PHRASES.append(p + " Je hebt alle sterretjes!")

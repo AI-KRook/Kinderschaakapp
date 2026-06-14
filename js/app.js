@@ -31,6 +31,12 @@
     App.progress.stars = (App.progress.stars || 0) + 1;
     saveProgress();
     updateStarCount();
+    // net genoeg sterren voor een nieuw verkleedspulletje? vier het!
+    if (typeof OUTFITS !== "undefined" && OUTFITS.some(function (o) { return o.cost === App.progress.stars; })) {
+      celebrate();
+      if (window.Paardje) Paardje.cheer();
+      Speech.speak("Hoera! Je hebt iets nieuws verdiend voor de verkleedkast!", { remember: false });
+    }
   }
   function updateStarCount() {
     var el = $("star-count");
