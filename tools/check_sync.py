@@ -26,7 +26,10 @@ for fname in ("app.js", "board.js"):
 # - bewuste toestel-stem-previews (moeten juist de toestel-stem laten horen)
 NIET_GESPROKEN = {
     "Het bord", "De stukken", "Slaan", "Schaak en mat", "Puzzels", "De opening", "Het eindspel", "Een partijtje",
+    "Slim slaan", "Mat oefenen", "Slim openen", "Mat in het eindspel",
     "Hoi! Zo klink ik.",
+    # knoplabels: staan op de knoppen in beeld, worden niet ingesproken
+    "Dame naar voren", "Paard eruit", "Ja, schaak!", "Nee, veilig", "Ja, op tijd", "Nee, te ver", "Pat, gelijk",
 }
 
 def looks_spoken(s):

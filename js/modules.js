@@ -18,6 +18,41 @@
   var COUNT = ["Eén ster!", "Twee sterren!", "Drie sterren!", "Vier sterren!"];
   var SLAGEN = ["Hebbes! Lekker geslagen!", "Boem! Mooi gepakt!", "Ja! Dat ging knap!"];
 
+  // korte schrijfwijze voor standen: 'wke8' -> { color:'w', type:'k', square:'e8' }
+  function P1(s) { return { color: s[0], type: s[1], square: s.slice(2) }; }
+  function PP(str) { return str.split(" ").map(P1); }
+
+  // keuzeknoppen (ja/nee, mat/pat, ...) in de actiebalk; lost de gekozen waarde op
+  function askChoice(L, options) {
+    return new Promise(function (resolve) {
+      var actions = document.getElementById("lesson-actions");
+      if (!actions) { resolve(null); return; }
+      actions.innerHTML = "";
+      options.forEach(function (o) {
+        var b = document.createElement("button");
+        b.type = "button";
+        b.className = "big-action " + (o.cls || "sun");
+        b.innerHTML = (o.glyph ? '<span class="ba-emoji">' + o.glyph + '</span> ' : "") + o.label;
+        b.addEventListener("click", function () {
+          if (!L.alive()) return;
+          actions.innerHTML = "";
+          resolve(o.value);
+        });
+        actions.appendChild(b);
+      });
+    });
+  }
+
+  // stel een herken-vraag met knoppen; herhaalt tot het juiste antwoord
+  async function askPick(L, vraag, options, correct, goed, fout) {
+    await L.say(vraag, { mood: "think" });
+    while (true) {
+      var ans = await askChoice(L, options);
+      if (ans === correct) { L.cheer(); L.star(); await L.say(goed, { mood: "happy" }); return; }
+      await L.say(fout);
+    }
+  }
+
   /* ============================ MODULE 1: HET BORD ============================ */
   async function moduleBoard(L) {
     L.board.setupCustom([], "w");
@@ -36,6 +71,19 @@
       if (taps < 4) L.blurt(pick(["Ja, die lichtte op! Nog eentje.", "Leuk hè? Probeer er nog een.", "Hihi, jij snapt het al. Nog een keer!"]));
     }
     await L.say("Goed zo! Je hebt het hele bord ontdekt.");
+
+    // de vorm van het bord: rijen, lijnen en diagonalen (kort en luchtig)
+    await L.say("Kijk, de vakjes liggen in rijtjes naast elkaar. Zo'n rijtje van links naar rechts heet een rij.");
+    await L.say("En van jou naar de overkant lopen de lijnen, recht vooruit.");
+    await L.say("Gaat het schuin? Dan heet het een diagonaal. Daar houdt de loper van!");
+    await L.say("Tik nu eens op een hoekje van het bord, helemaal in de hoek.");
+    while (true) {
+      var t = await L.waitTap();
+      if (t.square === "a1" || t.square === "a8" || t.square === "h1" || t.square === "h8") { L.cheer(); L.star(); break; }
+      L.blurt(pick(["Bijna! Een hoekje zit helemaal in de hoek.", "Net niet, zoek een hoekje van het bord."]));
+    }
+    await L.say("Knap gevonden! Dat was een hoekje van het bord.");
+
     await L.say("Klaar om de stukken te leren kennen? Daar gaan we!", { mood: "happy" });
     L.done();
   }
@@ -204,9 +252,8 @@
       await captureRound(L, CAPTURES[i]);
       await L.wait(300);
     }
-    await enPassantRound(L);
     await L.say("Knap! Maar let op: de tegenstander mag jouw stukken ook slaan. Bescherm ze dus goed.");
-    await L.say("Slaan kun je nu ook, en zelfs en passant! Je wordt steeds beter, zeg!", { mood: "happy" });
+    await L.say("Je kunt nu slaan met al je stukken. Je wordt steeds beter, zeg!", { mood: "happy" });
     L.done();
   }
 
@@ -780,17 +827,437 @@
     L.done();
   }
 
+  /* ============================ MODULE: SLIM SLAAN ============================ */
+  // Stukwaarden + slim kiezen wat je slaat: gratis stukken, het sterkste pakken,
+  // en terugslaan. Loopt op van makkelijk naar moeilijk. Alle standen vooraf met
+  // chess.js gecontroleerd (zie tools-verificatie).
+
+  // de waarde van de stukken, met twee tik-vragen
+  async function askValueTap(L, wantType, hintSquare, vraag, goed) {
+    await L.say(vraag, { mood: "think" });
+    var tries = 0;
+    while (true) {
+      var t = await L.waitTap();
+      if (t.piece && t.piece.type === wantType && t.piece.color === "w") {
+        L.unpoint(); L.cheer(); L.star();
+        await L.say(goed, { mood: "happy" });
+        return;
+      }
+      tries++;
+      await L.say("Bijna! Kijk nog eens goed naar de stukken.");
+      if (tries >= 2) L.point(hintSquare);
+    }
+  }
+
+  async function teachValues(L) {
+    L.board.setupCustom([
+      { type: "p", color: "w", square: "b4" },
+      { type: "n", color: "w", square: "c4" },
+      { type: "b", color: "w", square: "d4" },
+      { type: "r", color: "w", square: "e4" },
+      { type: "q", color: "w", square: "f4" }
+    ], "w");
+    L.board.setMode("tap");
+    await L.say("Voordat je slim leert slaan, moet je weten hoe sterk elk stuk is. Elk stuk is punten waard.");
+    L.point("b4"); await L.say("De pion is het zwakste. Hij is één punt waard."); L.unpoint();
+    L.point("c4"); await L.say("Het paard is drie punten waard."); L.unpoint();
+    L.point("d4"); await L.say("De loper ook, drie punten."); L.unpoint();
+    L.point("e4"); await L.say("De toren is sterker. Vijf punten."); L.unpoint();
+    L.point("f4"); await L.say("En de dame is de sterkste van allemaal. Negen punten!"); L.unpoint();
+    await askValueTap(L, "q", "f4", "Tik nu op het sterkste stuk. Welke is dat?", "Dat is de dame! Negen punten, de sterkste van het bord.");
+    await askValueTap(L, "r", "e4", "En tik nu op het stuk dat vijf punten waard is.", "Ja! De toren, vijf punten.");
+  }
+
+  // eenvoudige slag-oefening: alleen 'only' beweegbaar, sla het juiste stuk
+  async function captureExercise(L, def) {
+    function setup() {
+      L.board.setupCustom(def.pieces, "w");
+      L.board.setMode("move");
+      L.board.setMovable(function (sq) { return sq === def.only; });
+      L.point(def.point);
+    }
+    setup();
+    await L.say(def.zeg, { mood: "think" });
+    var tries = 0;
+    while (true) {
+      var mv = await L.waitMove();
+      if (mv.captured && (!def.target || mv.to === def.target)) {
+        L.unpoint(); L.cheer(); L.star();
+        await L.say(def.gelukt || pick(SLAGEN), { mood: "happy" });
+        return;
+      }
+      tries++;
+      await L.say(pick(TRY_AGAIN));
+      setup();
+      if (tries >= 2 && def.hint) await L.say(def.hint);
+    }
+  }
+
+  var SMART = [
+    { only: "e4", point: "d6", target: "d6",
+      pieces: [{ type: "k", color: "w", square: "h1" }, { type: "n", color: "w", square: "e4" },
+               { type: "k", color: "b", square: "h8" }, { type: "r", color: "b", square: "d6" }],
+      zeg: "Slaan met het paard! Het paard springt in een L, en zo pakt hij de toren. Tik op je paard en sla de toren.",
+      gelukt: "Hebbes! Een toren gepakt met je paard. Vijf punten gewonnen!",
+      hint: "Tik op je paard en spring naar de toren die het handje aanwijst." },
+    { only: "d1", point: "d6", target: "d6",
+      pieces: [{ type: "k", color: "w", square: "h1" }, { type: "q", color: "w", square: "d1" },
+               { type: "k", color: "b", square: "h8" }, { type: "r", color: "b", square: "d6" }],
+      zeg: "Nu met de dame. Zij is sterk en pakt ver weg. Sla de toren!",
+      gelukt: "Knap! Je dame pakte de toren.",
+      hint: "Tik op je dame en pak de toren die het handje aanwijst." }
+  ];
+
+  // pak het sterkste stuk (toren 5 boven paard 3)
+  async function exStrongest(L) {
+    function setup() {
+      L.board.setupCustom([
+        { type: "k", color: "w", square: "a1" }, { type: "q", color: "w", square: "d1" },
+        { type: "k", color: "b", square: "a8" }, { type: "n", color: "b", square: "d5" },
+        { type: "r", color: "b", square: "h5" }
+      ], "w");
+      L.board.setMode("move");
+      L.board.setMovable(function (sq) { return sq === "d1"; });
+      L.point("h5");
+    }
+    setup();
+    await L.say("Je kunt twee stukken pakken. Een paard van drie punten, of een toren van vijf. Pak altijd de sterkste!", { mood: "think" });
+    while (true) {
+      var mv = await L.waitMove();
+      if (mv.captured && mv.to === "h5") {
+        L.unpoint(); L.cheer(); L.star();
+        await L.say("Top! De toren is vijf punten, meer dan het paard. Altijd het sterkste pakken!", { mood: "happy" });
+        return;
+      }
+      if (mv.captured && mv.to === "d5") await L.say("Bijna! Je pakte het paard, drie punten. Maar de toren is meer waard. Pak de sterkste!");
+      else await L.say(pick(TRY_AGAIN));
+      setup();
+    }
+  }
+
+  // verdedigd of niet: pak de gratis toren, niet de verdedigde loper
+  async function exDefended(L) {
+    function setup() {
+      L.board.setupCustom([
+        { type: "k", color: "w", square: "h1" }, { type: "q", color: "w", square: "d1" },
+        { type: "k", color: "b", square: "h8" }, { type: "r", color: "b", square: "d5" },
+        { type: "b", color: "b", square: "a4" }, { type: "p", color: "b", square: "b5" }
+      ], "w");
+      L.board.setMode("move");
+      L.board.setMovable(function (sq) { return sq === "d1"; });
+      L.point("d5");
+    }
+    setup();
+    await L.say("Nu goed opletten! Pak alleen het stuk dat veilig is. De loper bij de rand wordt verdedigd door een pion. De toren staat helemaal alleen.", { mood: "think" });
+    while (true) {
+      var mv = await L.waitMove();
+      if (mv.captured && mv.to === "d5") {
+        L.unpoint(); L.cheer(); L.star();
+        await L.say("Knap! De toren stond onverdedigd, die pak je gratis. Vijf punten!", { mood: "happy" });
+        return;
+      }
+      if (mv.captured && mv.to === "a4") {
+        await L.wait(350);
+        L.board.move("b5", "a4"); // de pion slaat de dame terug
+        await L.wait(900);
+        await L.say("Oei! Zag je dat? De pion sloeg jouw dame terug. De loper werd verdedigd. Dat kostte je je sterkste stuk!");
+      } else {
+        await L.say(pick(TRY_AGAIN));
+      }
+      setup();
+    }
+  }
+
+  // terugslaan: zwart pakt je pion, jij slaat terug
+  async function exRecapture(L) {
+    function setup() { L.board.setFEN("7k/3r4/8/8/8/3P4/8/5B1K b - - 0 1"); L.board.setMode("locked"); }
+    function enable() {
+      L.board.setMode("move");
+      L.board.setMovable(function (sq) { return sq === "f1"; });
+      L.point("d3");
+    }
+    setup();
+    await L.say("Soms slaat de tegenstander jouw stuk. Dan sla je gewoon terug! Dat heet terugslaan.", { mood: "think" });
+    await L.wait(300);
+    L.board.move("d7", "d3"); // zwart slaat de pion
+    await L.wait(900);
+    await L.say("Au! Ik pakte net je pion met mijn toren. Maar nu staat mijn toren onbeschermd. Pak hem terug met je loper!");
+    enable();
+    while (true) {
+      var mv = await L.waitMove();
+      if (mv.captured && mv.to === "d3") {
+        L.unpoint(); L.cheer(); L.star();
+        await L.say("Mooi teruggeslagen! Nu sta je weer gelijk. Goed onthouden: sla bijna altijd terug!", { mood: "happy" });
+        return;
+      }
+      await L.say(pick(TRY_AGAIN));
+      setup();
+      await L.wait(200);
+      L.board.move("d7", "d3");
+      await L.wait(700);
+      enable();
+    }
+  }
+
+  async function moduleSmartCapture(L) {
+    await teachValues(L);
+    await L.wait(300);
+    await L.say("Nu ga je slim slaan! Pak stukken die je gratis kunt krijgen, en altijd de sterkste.");
+    await captureExercise(L, SMART[0]); await L.wait(300); // slaan met het paard
+    await captureExercise(L, SMART[1]); await L.wait(300); // slaan met de dame
+    await exStrongest(L); await L.wait(300);                // pak de sterkste
+    await exDefended(L); await L.wait(300);                 // verdedigd of niet
+    await exRecapture(L);                                   // terugslaan
+    L.board.clearGoals();
+    L.celebrate();
+    await L.say("Wauw! Nu weet je hoeveel de stukken waard zijn, en hoe je slim slaat. Wat ben jij knap geworden!", { mood: "happy" });
+    L.done();
+  }
+
+  /* ============================ MODULE: MAT OEFENEN ============================ */
+  // Vervolg op "Schaak en mat": schaak herkennen, uit schaak komen, matpatronen,
+  // pat herkennen, en de en-passant-slag (die nu hier hoort, na schaak en mat).
+  // Alle standen vooraf met chess.js gecontroleerd.
+
+  var JANEE = [
+    { label: "Ja, schaak!", glyph: "⚠️", cls: "coral", value: true },
+    { label: "Nee, veilig", glyph: "🛡️", cls: "green", value: false }
+  ];
+  var MATPAT = [
+    { label: "Schaakmat", glyph: "👑", cls: "coral", value: "mat" },
+    { label: "Pat, gelijk", glyph: "🤝", cls: "green", value: "pat" }
+  ];
+
+  async function recognizeCheck(L, stand, isSchaak, goed, fout) {
+    L.board.setupCustom(PP(stand), "b");
+    L.board.setMode("locked");
+    await askPick(L, "Kijk naar de zwarte koning. Staat hij schaak?", JANEE, isSchaak, goed, fout);
+  }
+
+  async function recognizeMatPat(L, stand, antwoord, goed, fout) {
+    L.board.setupCustom(PP(stand), "b");
+    L.board.setMode("locked");
+    await askPick(L, "Kijk goed. Is dit schaakmat, of pat?", MATPAT, antwoord, goed, fout);
+  }
+
+  // uit schaak komen: alleen 'only' beweegbaar, het kind doet de reddende zet
+  async function escapeCheck(L, def) {
+    function setup() {
+      L.board.setupCustom(PP(def.stand), "w");
+      L.board.setMode("move");
+      L.board.setMovable(function (sq) { return sq === def.only; });
+      L.board.showHintFrom(def.attacker);
+      L.point(def.point);
+    }
+    setup();
+    await L.say(def.zeg, { mood: "think" });
+    // chess.js staat alleen legale (schaak-opheffende) zetten toe, dus elke
+    // geaccepteerde zet redt de koning; verkeerde pogingen komen niet door.
+    await L.waitMove();
+    L.unpoint(); L.cheer(); L.star();
+    await L.say(def.goed, { mood: "happy" });
+  }
+
+  async function moduleMatePractice(L) {
+    await L.say("Je kent al schaak en mat. Nu ga je het echt oefenen. Het wordt een beetje moeilijker!", { mood: "happy" });
+
+    // 1) schaak herkennen
+    await recognizeCheck(L, "bke8 wqe2 wka1", true,
+      "Ja! De dame valt de koning aan over de lijn. Dat is schaak.",
+      "Kijk nog eens. De dame staat op dezelfde lijn als de koning. Dat ís schaak.");
+    await recognizeCheck(L, "bke8 wqd2 wka1", false,
+      "Klopt! De dame raakt de koning niet. Hij is veilig.",
+      "Kijk goed. De dame raakt de koning helemaal niet. Het is geen schaak.");
+    await recognizeCheck(L, "bkh8 wbb2 wka1", true,
+      "Ja! De loper valt de koning schuin aan. Schaak!",
+      "Volg de schuine lijn van de loper. Die komt precies bij de koning. Dat is schaak.");
+
+    // 2) uit schaak komen, de drie manieren (nu doet het kind ze zelf)
+    await L.say("Goed! En als JIJ schaak staat? Dan moet je je koning redden. Er zijn drie manieren.");
+    await escapeCheck(L, { stand: "wke1 bre8 bka8", only: "e1", attacker: "e8", point: "f2",
+      zeg: "Eén: loop weg! Jouw koning staat schaak. Zet hem op een veilig vakje, weg van de lijn.",
+      goed: "Knap weggelopen! Je koning is veilig." });
+    await escapeCheck(L, { stand: "wke1 bre8 wra4 bka8", only: "a4", attacker: "e8", point: "e4",
+      zeg: "Twee: zet er iets voor! Schuif je toren tussen de koning en de aanvaller, als een schildje.",
+      goed: "Mooi geblokt! De toren staat er als een schildje voor." });
+    await escapeCheck(L, { stand: "wkg1 brg2 wra2 bka8", only: "a2", attacker: "g2", point: "g2",
+      zeg: "Drie: sla de aanvaller! Pak het stuk dat jouw koning schaak geeft.",
+      goed: "Hebbes! De aanvaller is weg, je koning is veilig." });
+
+    // 3) matpatronen (mat in één)
+    await L.say("Top! Nu ga je zelf matzetten. Drie verschillende manieren.");
+    await matePuzzle(L, { pieces: PP("bka8 wrg7 wrh1 wke1"), point: "h8", hintFrom: "h1",
+      zeg: "Mat met je twee torens! De ene toren bewaakt al een rij. Schuif de andere helemaal naar boven.",
+      hint: "Een tipje: schuif je toren op de h-lijn naar boven, naar h8." });
+    await L.wait(300);
+    await matePuzzle(L, { pieces: PP("bkg8 bpf7 bpg7 bph7 wre1 wka1"), point: "e8", hintFrom: "e1",
+      zeg: "De achterste-rij-mat! De koning zit gevangen achter zijn eigen pionnen. Schuif je toren naar de bovenste rij.",
+      hint: "Een tipje: schuif je toren naar boven, naar e8." });
+    await L.wait(300);
+    await matePuzzle(L, { pieces: PP("bkg8 wkg6 wqd7"), point: "g7", hintFrom: "d7",
+      zeg: "Damemat met hulp van je koning! Zet je dame vlak naast de zwarte koning. Jouw koning past op de dame.",
+      hint: "Een tipje: zet je dame op g7, vlak naast de koning." });
+    await L.wait(300);
+
+    // 4) mat of pat?
+    await L.say("Pas op! Soms lijkt het mat, maar is het pat. Bij pat kan de koning niet meer zetten, maar staat hij NIET schaak. Dan is het gelijk.");
+    await recognizeMatPat(L, "bkh8 wkf7 wqg6", "pat",
+      "Goed gezien! De koning kan nergens heen, maar staat niet schaak. Dat is pat, dus gelijkspel.",
+      "Kijk: de koning staat niet schaak, en kan niet zetten. Dat is pat, geen mat.");
+    await recognizeMatPat(L, "bkh8 wkf7 wqg7", "mat",
+      "Precies! De dame geeft schaak en de koning kan niet weg. Schaakmat!",
+      "Kijk: de dame valt de koning aan en hij kan niet ontsnappen. Dat is mat.");
+
+    // 5) en passant (bonus, hoort na schaak en mat)
+    await L.say("Je bent nu een echte matmeester! Eén bijzondere slag heb je nog niet gezien. Hij heet en passant.");
+    await enPassantRound(L);
+
+    L.board.clearGoals();
+    L.celebrate();
+    await L.say("Wauw! Je herkent schaak, mat en pat, je komt uit schaak, en je kent en passant. Wat ben jij goed!", { mood: "happy" });
+    L.done();
+  }
+
+  /* ============================ MODULE: SLIM OPENEN ============================ */
+  // Vervolg op "De opening": de echte openingsregels, stap voor stap voorgedaan.
+  async function moduleOpeningSmart(L) {
+    L.board.setFlipped(false);
+    L.board.reset();
+    L.board.setMode("locked");
+    await L.say("Je kent de eerste stappen al. Nu leer je openen als een echte schaker!", { mood: "happy" });
+
+    // begeleid één zet: alleen 'only' beweegbaar, daarna het zwarte antwoord
+    async function guide(only, target, zeg, reply, flag) {
+      function setup() {
+        L.board.setMode("move");
+        L.board.setMovable(function (sq) { return sq === only; });
+        L.point(target);
+      }
+      setup();
+      await L.say(zeg);
+      while (true) {
+        var mv = await L.waitMove();
+        var goal = flag ? (mv.flags && mv.flags.indexOf(flag) >= 0) : (mv.to === target);
+        if (goal) {
+          L.unpoint();
+          L.blurt(pick(["Mooie zet!", "Goed bezig!", "Knap!"]));
+          if (reply) { await L.wait(450); L.board.move(reply[0], reply[1]); await L.wait(300); }
+          return;
+        }
+        await L.say(pick(TRY_AGAIN));
+        L.board.undoLast();
+        setup();
+      }
+    }
+
+    await guide("e2", "e4", "Regel één: beheers het centrum. Zet je pion in het midden, twee vakjes vooruit.", ["e7", "e5"]);
+
+    // dame niet te vroeg (keuze met knoppen)
+    L.board.setMode("locked");
+    await askPick(L, "Een keuze! Wat is slim aan het begin? Je dame ver naar voren, of eerst een stuk ontwikkelen?",
+      [{ label: "Dame naar voren", glyph: "♛", cls: "coral", value: "dame" },
+       { label: "Paard eruit", glyph: "♞", cls: "green", value: "paard" }],
+      "paard",
+      "Precies! Haal eerst je stukken eruit. De dame te vroeg wordt opgejaagd, en dan verlies je tijd.",
+      "Niet de dame zo vroeg! Die wordt opgejaagd door de kleine stukken. Ontwikkel liever een paard.");
+
+    await guide("g1", "f3", "Goed! Ontwikkel een paard naar buiten. Hij valt meteen de pion in het midden aan.", ["b8", "c6"]);
+    await guide("f1", "c4", "Nu je loper naar buiten, naar een actief vakje.", ["f8", "c5"]);
+    await guide("b1", "c3", "Ontwikkel je ANDERE stukken, niet steeds hetzelfde stuk. Het tweede paard eruit!", ["g8", "f6"]);
+    await guide("e1", "g1", "En het allerbelangrijkste: zet je koning op tijd veilig. Rokeer!", null, "k");
+
+    L.cheer(); L.star();
+    L.celebrate();
+    await L.say("Wauw! Je beheerst het centrum, al je stukken staan klaar, en je koning is veilig. Zo open je als een kampioen!", { mood: "happy" });
+    L.done();
+  }
+
+  /* ============================ MODULE: EINDSPEL MATZETTEN ============================ */
+  // De kale koning matzetten met dame en toren (de kern die in "Het eindspel"
+  // nog ontbrak), plus het vierkant van de pion en promoveren met koningssteun.
+  async function moduleEndgameMate(L) {
+    await L.say("Nu het belangrijkste eindspel: de kale koning matzetten. Eerst met je dame, dan met je toren!", { mood: "happy" });
+
+    // helper: laat het kind één stuk naar een doelvakje brengen
+    async function moveTo(only, target, isPromo) {
+      function setup() {
+        L.board.setMode("move");
+        L.board.setMovable(function (sq) { return sq === only; });
+        L.board.showHintFrom(target);
+        L.point(target);
+      }
+      setup();
+      while (true) {
+        var mv = await L.waitMove();
+        var ok = isPromo ? (mv.flags && mv.flags.indexOf("p") >= 0) : (mv.to === target);
+        if (ok) { L.unpoint(); L.cheer(); L.star(); return; }
+        await L.say(pick(TRY_AGAIN));
+        L.board.undoLast();
+        setup();
+      }
+    }
+
+    // 1) mat met de dame (koningen in oppositie, dame op de achterlijn)
+    await matePuzzle(L, { pieces: PP("bke8 wke6 wqh1"), point: "h8", hintFrom: "h1",
+      zeg: "Mat met de dame! Jouw koning staat al tegenover de zwarte koning. Geef nu mat met je dame op de bovenste rij.",
+      hint: "Een tipje: schuif je dame helemaal naar boven, naar h8." });
+    await L.wait(300);
+
+    // 2) mat met de toren
+    await matePuzzle(L, { pieces: PP("bke8 wke6 wra1"), point: "a8", hintFrom: "a1",
+      zeg: "Nu met de toren! Weer staan de koningen tegenover elkaar. Geef mat met je toren op de bovenste rij.",
+      hint: "Een tipje: schuif je toren helemaal naar boven, naar a8." });
+    await L.wait(300);
+
+    // 3) het vierkant van de pion (herkenning)
+    L.board.setupCustom(PP("wph5 bkd5 wke1"), "w");
+    L.board.setMode("locked");
+    await askPick(L, "De witte pion rent naar boven. Haalt de zwarte koning hem nog in voordat hij dame wordt?",
+      [{ label: "Ja, op tijd", glyph: "🏃", cls: "coral", value: "ja" },
+       { label: "Nee, te ver", glyph: "👑", cls: "green", value: "nee" }],
+      "nee",
+      "Klopt! De koning staat te ver weg. De pion wordt dame. Dat heet het vierkant van de pion.",
+      "Tel maar mee: de koning staat buiten het vierkant van de pion. Hij is te laat, de pion wordt dame.");
+
+    // 4) promoveren met koningssteun
+    L.board.setupCustom(PP("bkd7 wkb6 wpa7"), "w");
+    await L.say("Soms hoef je niet eens mat te geven: maak gewoon een nieuwe dame! Jouw koning beschermt de pion. Promoveer hem!", { mood: "think" });
+    await moveTo("a7", "a8", true);
+    await L.say("De pion is een dame geworden! Met zo'n dame win je makkelijk.", { mood: "happy" });
+    await L.wait(300);
+
+    // 5) oppositie gebruiken om door te breken
+    L.board.setupCustom(PP("bkd6 wkc4 wpc3"), "w");
+    await L.say("Tot slot: gebruik de oppositie om door te breken. Zet je koning recht tegenover de zwarte koning, één vakje ertussen.", { mood: "think" });
+    await moveTo("c4", "d4");
+    await L.say("Knap! Nu heb jij de oppositie. De zwarte koning moet wijken.", { mood: "happy" });
+    await L.wait(300);
+    L.board.move("d6", "e6"); // zwart wijkt
+    await L.wait(800);
+    await L.say("Zie je? Nu is er ruimte. Duw je pion verder naar voren!");
+    await moveTo("c3", "c4");
+
+    L.board.clearGoals();
+    L.celebrate();
+    await L.say("Geweldig! Je kunt nu matzetten met de dame en de toren, en je brengt een pion naar dame. Echt knap!", { mood: "happy" });
+    L.done();
+  }
+
   /* ---------- registratie ---------- */
   window.Modules = {
     list: [
-      { id: "board",     emoji: "🏁", title: "Het bord",        run: moduleBoard },
-      { id: "pieces",    emoji: "♟️", title: "De stukken",       run: modulePieces },
-      { id: "capture",   emoji: "💥", title: "Slaan",            run: moduleCapture },
-      { id: "checkmate", emoji: "👑", title: "Schaak en mat",    run: moduleCheckmate },
-      { id: "puzzles",   emoji: "🧩", title: "Puzzels",          run: modulePuzzles },
-      { id: "opening",   emoji: "🚀", title: "De opening",       run: moduleOpening },
-      { id: "endgame",   emoji: "🏅", title: "Het eindspel",     run: moduleEndgame },
-      { id: "play",      emoji: "🏆", title: "Een partijtje",    run: modulePlay }
+      { id: "board",        emoji: "🏁", title: "Het bord",        run: moduleBoard },
+      { id: "pieces",       emoji: "♟️", title: "De stukken",       run: modulePieces },
+      { id: "capture",      emoji: "💥", title: "Slaan",            run: moduleCapture },
+      { id: "smartcapture", emoji: "🎯", title: "Slim slaan",       run: moduleSmartCapture },
+      { id: "checkmate",    emoji: "👑", title: "Schaak en mat",    run: moduleCheckmate },
+      { id: "matework",     emoji: "⚔️", title: "Mat oefenen",      run: moduleMatePractice },
+      { id: "puzzles",      emoji: "🧩", title: "Puzzels",          run: modulePuzzles },
+      { id: "opening",      emoji: "🚀", title: "De opening",       run: moduleOpening },
+      { id: "openingsmart", emoji: "🧭", title: "Slim openen",      run: moduleOpeningSmart },
+      { id: "endgame",      emoji: "🏅", title: "Het eindspel",     run: moduleEndgame },
+      { id: "endgamemate",  emoji: "🏰", title: "Mat in het eindspel", run: moduleEndgameMate },
+      { id: "play",         emoji: "🏆", title: "Een partijtje",    run: modulePlay }
     ]
   };
 })();

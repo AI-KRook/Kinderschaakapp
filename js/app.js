@@ -108,17 +108,21 @@
     board:     { leert: "Kennismaken met de 64 vakjes van het bord.", tip: "Laat je kind gerust een paar keer tikken; herhaling helpt." },
     pieces:    { leert: "Hoe elk stuk loopt: toren, loper, paard, dame, koning en pion.", tip: "Vraag thuis: hoe loopt de toren? Zo blijft het hangen." },
     capture:   { leert: "Stukken van de tegenstander pakken, ook de bijzondere en-passant-slag.", tip: "Speel een slag na met echte stukken op tafel." },
+    smartcapture: { leert: "Hoe sterk elk stuk is (de stukwaarden) en slim slaan: gratis stukken pakken, het sterkste kiezen, en terugslaan.", tip: "Vraag thuis: wat is meer waard, de toren of de loper?" },
     checkmate: { leert: "De koning aanvallen (schaak), vangen (mat), de drie manieren om uit schaak te komen, en rokeren.", tip: "Wijs samen aan waar de koning nog naartoe kan." },
+    matework:  { leert: "Schaak herkennen, zelf uit schaak komen, matpatronen (twee torens, achterste rij, dame), pat herkennen, en de en-passant-slag.", tip: "Vraag: staat de koning schaak? En hoe kom je eruit?" },
     opening:   { leert: "Goed beginnen: een pion in het midden, je stukken naar buiten, en rokeren.", tip: "Laat je kind elke partij zo beginnen." },
-    endgame:   { leert: "De kale koning matzetten met de dame of de toren, geholpen door de eigen koning.", tip: "Oefen samen het allerlaatste zetje." },
+    openingsmart: { leert: "Slim openen: het centrum beheersen, alle stukken ontwikkelen, niet hetzelfde stuk twee keer, de dame niet te vroeg, en op tijd rokeren.", tip: "Vraag waarom je de dame niet meteen ver naar voren zet." },
+    endgame:   { leert: "De koning sterk gebruiken in het eindspel: de oppositie, een actieve koning, en een pion naar de overkant brengen.", tip: "Oefen samen het allerlaatste zetje." },
+    endgamemate: { leert: "De kale koning matzetten met de dame en met de toren, het vierkant van de pion, en een pion naar dame brengen met koningssteun.", tip: "Oefen samen het matzetje met dame of toren." },
     puzzles:   { leert: "Slimme zetten herkennen: gratis stuk pakken, de vork, de spies, aftrekschaak en mat in één.", tip: "Eén puzzel per keer is genoeg; vier elk sterretje." },
     play:      { leert: "Een hele partij spelen tegen de computer, met of zonder hints.", tip: "Begin op het makkelijkste niveau, zodat je kind kan winnen." }
   };
   function rankName(done) {
-    if (done >= 8) return "Schaakkampioen";
-    if (done >= 6) return "Schaakridder";
-    if (done >= 4) return "Torenwachter";
-    if (done >= 2) return "Pionnetje";
+    if (done >= 12) return "Schaakkampioen";
+    if (done >= 9) return "Schaakridder";
+    if (done >= 6) return "Torenwachter";
+    if (done >= 3) return "Pionnetje";
     return "Net begonnen";
   }
   function buildParentInfo() {
@@ -260,6 +264,9 @@
     Board.clearGoals();
     Board.clearHighlights();
     Board.setFlipped(false); // standaard wit onder; alleen het partijtje draait eventueel
+    // begin altijd met een leeg bord, zodat de stand van de vorige les nooit even
+    // blijft staan terwijl de nieuwe module zijn intro al uitspreekt
+    Board.setupCustom([], "w");
     var run = { id: ++App._runToken, cancelled: false, pending: [] };
     App._run = run;
     var L = makeL(run, mod);
