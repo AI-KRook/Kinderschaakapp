@@ -4,7 +4,7 @@
    de geluidsfragmenten worden vanzelf bewaard zodra ze voor het eerst klinken
    (cache-first met lui opslaan). Verhoog CACHE bij elke nieuwe versie.
    ================================================================= */
-var CACHE = "hinnik-schaak-v32";
+var CACHE = "hinnik-schaak-v33";
 
 var ASSETS = [
   "./",

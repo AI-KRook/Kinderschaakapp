@@ -467,6 +467,35 @@
     });
   }
 
+  // laat het ballonnetje netjes passen: het groeit omhoog tot vlak onder de
+  // knoppen (als die in beeld staan) en de lettergrootte wordt zo gekozen dat
+  // de hele zin past. Zo wordt tekst nooit afgekapt en loopt de ballon nooit
+  // over de knoppen (verder, ja/nee, kies-kleur, hint) heen.
+  function fitSpeechBubble(bubble) {
+    var rect = bubble.getBoundingClientRect();
+    var maxH = 200; // standaard maximale hoogte
+    // staan er knoppen in beeld (verder, ja/nee, kies-kleur, hint)? bereken
+    // dan de vrije ruimte tussen die knoppen en de onderkant van de ballon,
+    // zodat de ballon er nooit overheen groeit. Werkt met relatieve posities,
+    // dus ongevoelig voor een rare viewport.
+    var actions = document.getElementById("lesson-actions");
+    if (actions && actions.children.length) {
+      var ar = actions.getBoundingClientRect();
+      if (ar.height > 0 && ar.bottom < rect.bottom) {
+        maxH = Math.min(maxH, rect.bottom - ar.bottom - 12);
+      }
+    }
+    maxH = Math.max(48, Math.round(maxH));
+    bubble.style.maxHeight = maxH + "px";
+
+    var MAX = 18, MIN = 11, size = MAX;
+    bubble.style.fontSize = MAX + "px";
+    while (size > MIN && bubble.scrollHeight > bubble.clientHeight) {
+      size -= 1;
+      bubble.style.fontSize = size + "px";
+    }
+  }
+
   /* ---------- alle knoppen koppelen ---------- */
   function wireEvents() {
     $("start-button").addEventListener("click", onStart);
@@ -546,7 +575,7 @@
     Speech.on("text", function (text) {
       var bubble = $("speech-bubble"), span = $("speech-text");
       if (!bubble || !span) return;
-      if (text) { span.textContent = text; bubble.classList.add("show"); }
+      if (text) { span.textContent = text; bubble.classList.add("show"); fitSpeechBubble(bubble); }
       else { bubble.classList.remove("show"); }
     });
   }
