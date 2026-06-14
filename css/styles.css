@@ -261,6 +261,8 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 .menu-card.puzzle-card .card-emoji { background: #fff0c2; }
 .menu-card.open-card { background: linear-gradient(180deg,#fff,#e9f3ff); }
 .menu-card.open-card .card-emoji { background: #d9ecff; }
+.menu-card.endgame-card { background: linear-gradient(180deg,#fff,#e7f7ee); }
+.menu-card.endgame-card .card-emoji { background: #d6f5e3; }
 .menu-card.play-card { background: linear-gradient(180deg,#fff,#fff6e6); }
 .menu-card.play-card .card-emoji { background: #d6f5e3; }
 

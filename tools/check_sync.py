@@ -21,7 +21,7 @@ strings = re.findall(r'"((?:[^"\\]|\\.)*)"', src)
 # - menukaart-titels (staan in beeld, niet gesproken)
 # - bewuste toestel-stem-previews (moeten juist de toestel-stem laten horen)
 NIET_GESPROKEN = {
-    "Het bord", "De stukken", "Slaan", "Schaak en mat", "Puzzels", "De opening", "Een partijtje",
+    "Het bord", "De stukken", "Slaan", "Schaak en mat", "Puzzels", "De opening", "Het eindspel", "Een partijtje",
     "Hoi! Zo klink ik.",
 }
 

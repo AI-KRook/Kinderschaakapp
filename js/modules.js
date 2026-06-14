@@ -730,6 +730,43 @@
     L.done();
   }
 
+  /* ============================ MODULE: HET EINDSPEL ============================ */
+  // Maak-het-af: begeleide standen waar het kind de koning matzet (mat in één),
+  // met de eigen koning als hulp. Hergebruikt puzzleSolve (type "mate").
+  var ENDGAME = [
+    { type: "mate", only: "d1", point: "d8",
+      pieces: [{ type: "k", color: "b", square: "h8" }, { type: "k", color: "w", square: "g6" },
+               { type: "q", color: "w", square: "d1" }],
+      zeg: "Zet de zwarte koning mat met je dame. Schuif haar naar de bovenste rij.",
+      hint: "Een tipje: zet je dame helemaal naar boven, op het rijtje van de koning.",
+      gelukt: "Schaakmat! Je dame en je koning werkten samen. Knap!" },
+    { type: "mate", only: "h1", point: "h8",
+      pieces: [{ type: "k", color: "b", square: "a8" }, { type: "k", color: "w", square: "b6" },
+               { type: "r", color: "w", square: "h1" }],
+      zeg: "En nu met de toren! Schuif hem naar de bovenste rij, naast de koning.",
+      hint: "Een tipje: zet je toren helemaal naar boven.",
+      gelukt: "Schaakmat met de toren! Super!" },
+    { type: "mate", only: "a7", point: "g7",
+      pieces: [{ type: "k", color: "b", square: "h8" }, { type: "k", color: "w", square: "g6" },
+               { type: "q", color: "w", square: "a7" }],
+      zeg: "Nog eentje. Zet je dame vlak naast de koning. Jouw koning past op haar.",
+      hint: "Een tipje: zet je dame naast de zwarte koning.",
+      gelukt: "Schaakmat! Vlak naast de koning. Wat ben jij sterk!" }
+  ];
+
+  async function moduleEndgame(L) {
+    await L.say("Welkom bij het eindspel! Nu zijn er nog maar weinig stukken over. Jij moet de koning van de ander matzetten.", { mood: "happy" });
+    await L.say("De truc: jaag de koning naar de rand, en zet hem dan mat. Je eigen koning helpt mee.");
+    for (var i = 0; i < ENDGAME.length; i++) {
+      await puzzleSolve(L, ENDGAME[i]);
+      await L.wait(400);
+    }
+    L.board.clearGoals();
+    L.celebrate();
+    await L.say("Knap! Jij kan nu de koning matzetten. Zo win je een potje!", { mood: "happy" });
+    L.done();
+  }
+
   /* ---------- registratie ---------- */
   window.Modules = {
     list: [
@@ -739,6 +776,7 @@
       { id: "checkmate", emoji: "👑", title: "Schaak en mat",    run: moduleCheckmate },
       { id: "puzzles",   emoji: "🧩", title: "Puzzels",          run: modulePuzzles },
       { id: "opening",   emoji: "🚀", title: "De opening",       run: moduleOpening },
+      { id: "endgame",   emoji: "🏅", title: "Het eindspel",     run: moduleEndgame },
       { id: "play",      emoji: "🏆", title: "Een partijtje",    run: modulePlay }
     ]
   };
