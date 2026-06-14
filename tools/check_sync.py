@@ -12,10 +12,14 @@ def read(name):
     with open(os.path.join(HERE, "..", "js", name), encoding="utf-8") as f:
         return f.read()
 
-src = read("modules.js") + "\n" + read("app.js") + "\n" + read("board.js")
-
-# alle dubbele-aanhalingstekst-strings
-strings = re.findall(r'"((?:[^"\\]|\\.)*)"', src)
+# modules.js bevat alleen gesproken lesinhoud -> alle zin-strings meenemen.
+# app.js en board.js bevatten ook gewone schermtekst (bv. ouder-tips); daar
+# nemen we alleen strings mee die echt aan Speech.speak/preview worden gegeven.
+strings = re.findall(r'"((?:[^"\\]|\\.)*)"', read("modules.js"))
+for fname in ("app.js", "board.js"):
+    for line in read(fname).splitlines():
+        if "Speech.speak" in line or "Speech.preview" in line:
+            strings += re.findall(r'"((?:[^"\\]|\\.)*)"', line)
 
 # strings die wél als tekst voorkomen maar NIET door Hinnik worden ingesproken:
 # - menukaart-titels (staan in beeld, niet gesproken)

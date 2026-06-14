@@ -96,6 +96,60 @@
     if (id) Speech.preview("Kijk eens, wat zie ik er mooi uit!");
   }
 
+  /* ---------- voortgang & tips voor de ouder ---------- */
+  var LESSON_INFO = {
+    board:     { leert: "Kennismaken met de 64 vakjes van het bord.", tip: "Laat je kind gerust een paar keer tikken; herhaling helpt." },
+    pieces:    { leert: "Hoe elk stuk loopt: toren, loper, paard, dame, koning en pion.", tip: "Vraag thuis: hoe loopt de toren? Zo blijft het hangen." },
+    capture:   { leert: "Stukken van de tegenstander pakken, ook de bijzondere en-passant-slag.", tip: "Speel een slag na met echte stukken op tafel." },
+    checkmate: { leert: "De koning aanvallen (schaak), vangen (mat), de drie manieren om uit schaak te komen, en rokeren.", tip: "Wijs samen aan waar de koning nog naartoe kan." },
+    opening:   { leert: "Goed beginnen: een pion in het midden, je stukken naar buiten, en rokeren.", tip: "Laat je kind elke partij zo beginnen." },
+    endgame:   { leert: "De kale koning matzetten met de dame of de toren, geholpen door de eigen koning.", tip: "Oefen samen het allerlaatste zetje." },
+    puzzles:   { leert: "Slimme zetten herkennen: gratis stuk pakken, de vork, de spies, aftrekschaak en mat in één.", tip: "Eén puzzel per keer is genoeg; vier elk sterretje." },
+    play:      { leert: "Een hele partij spelen tegen de computer, met of zonder hints.", tip: "Begin op het makkelijkste niveau, zodat je kind kan winnen." }
+  };
+  function rankName(done) {
+    if (done >= 8) return "Schaakkampioen";
+    if (done >= 6) return "Schaakridder";
+    if (done >= 4) return "Torenwachter";
+    if (done >= 2) return "Pionnetje";
+    return "Net begonnen";
+  }
+  function buildParentInfo() {
+    var total = Modules.list.length;
+    var done = Modules.list.filter(function (m) { return App.progress[m.id]; }).length;
+    var stars = App.progress.stars || 0;
+    $("parentinfo-summary").innerHTML =
+      '<div class="pi-stat"><span class="pi-big">' + done + " / " + total + '</span><span class="pi-cap">lessen gedaan</span></div>' +
+      '<div class="pi-stat"><span class="pi-big">' + stars + '</span><span class="pi-cap">sterren</span></div>' +
+      '<div class="pi-stat"><span class="pi-big">' + rankName(done) + '</span><span class="pi-cap">niveau</span></div>';
+    var list = $("parentinfo-list");
+    list.innerHTML = "";
+    Modules.list.forEach(function (m) {
+      var info = LESSON_INFO[m.id] || { leert: "", tip: "" };
+      var d = !!App.progress[m.id];
+      var row = document.createElement("div");
+      row.className = "pi-row" + (d ? " done" : "");
+      row.innerHTML =
+        '<div class="pi-head"><span class="pi-emoji">' + m.emoji + '</span>' +
+        '<span class="pi-title">' + m.title + '</span>' +
+        '<span class="pi-check">' + (d ? "⭐" : "") + '</span></div>' +
+        '<p class="pi-leert">' + info.leert + '</p>' +
+        '<p class="pi-tip">Tip: ' + info.tip + '</p>';
+      list.appendChild(row);
+    });
+  }
+  function openParentInfo() {
+    buildParentInfo();
+    var w = $("parentinfo");
+    w.classList.add("is-open");
+    w.setAttribute("aria-hidden", "false");
+  }
+  function closeParentInfo() {
+    var w = $("parentinfo");
+    w.classList.remove("is-open");
+    w.setAttribute("aria-hidden", "true");
+  }
+
   /* ---------- schermen ---------- */
   function showScreen(name) {
     ["screen-start", "screen-menu", "screen-lesson"].forEach(function (id) {
@@ -390,6 +444,11 @@
     $("wardrobe-btn").addEventListener("click", openWardrobe);
     $("wardrobe-close").addEventListener("click", closeWardrobe);
     $("wardrobe").addEventListener("click", function (e) { if (e.target === $("wardrobe")) closeWardrobe(); });
+
+    // voortgang & tips voor de ouder
+    $("set-parentinfo").addEventListener("click", openParentInfo);
+    $("parentinfo-close").addEventListener("click", closeParentInfo);
+    $("parentinfo").addEventListener("click", function (e) { if (e.target === $("parentinfo")) closeParentInfo(); });
 
     setupParentButton();
 

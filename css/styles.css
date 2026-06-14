@@ -660,5 +660,26 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 .page-info p { font-size: 15px; color: var(--ink-soft); margin: 0 0 8px; }
 body.app-started .page-info { display: none; }
 
+/* voortgang & tips voor de ouder */
+.parentinfo-card { max-height: 86vh; overflow-y: auto; text-align: left; }
+.pi-summary { display: flex; gap: 10px; justify-content: space-between; margin-bottom: 14px; }
+.pi-stat {
+  flex: 1; background: #f4ead7; border-radius: 14px; padding: 10px 6px;
+  text-align: center; display: flex; flex-direction: column; gap: 2px;
+}
+.pi-big { font-weight: 900; font-size: 17px; color: var(--ink); line-height: 1.1; }
+.pi-stat .pi-cap { font-size: 11px; color: var(--ink-soft); }
+.pi-row { border-radius: 14px; background: #fbf4e6; padding: 10px 12px; margin: 8px 0; }
+.pi-row.done { background: #eef9f1; }
+.pi-head { display: flex; align-items: center; gap: 8px; }
+.pi-emoji { font-size: 22px; }
+.pi-title { font-weight: 800; flex: 1; }
+.pi-leert { font-size: 13px; margin: 6px 0 2px; color: var(--ink); line-height: 1.35; }
+.pi-tip { font-size: 13px; margin: 0; color: var(--ink-soft); line-height: 1.35; }
+.pi-tips { margin-top: 16px; }
+.pi-tips h3 { font-size: 15px; margin: 0 0 6px; }
+.pi-tips ul { margin: 0; padding-left: 18px; font-size: 13px; color: var(--ink-soft); }
+.pi-tips li { margin: 4px 0; }
+
 /* hide helper */
 .hidden { display: none !important; }
