@@ -43,20 +43,20 @@
   /* ============================ MODULE 2: DE STUKKEN ============================ */
   var PIECES = [
     { type: "r", naam: "de toren", start: "a1", path: ["a5", "f5", "f2"],
-      uitleg: "Dit is de toren. Hij rijdt kaarsrecht, net als een trein op de rails. Naar voren, naar achteren, of opzij. Zo ver als hij wil! Maar nooit schuin. De toren is een sterk stuk." },
+      uitleg: "Dit is de toren. Hij gaat rechtdoor: vooruit, achteruit of opzij. Maar nooit schuin." },
     { type: "b", naam: "de loper", start: "c1", path: ["h6", "f8", "a3"],
-      uitleg: "Dit is de loper. Hij glijdt altijd schuin, net een schaatser op het ijs. Zo ver als hij wil! Maar altijd schuin, nooit rechtdoor. En kijk: hij blijft steeds op dezelfde kleur." },
+      uitleg: "Dit is de loper. Hij gaat altijd schuin, en blijft op zijn eigen kleur." },
     { type: "n", naam: "het paard", start: "d4", path: ["f5", "d6", "b5"],
-      uitleg: "Dit is het paard. Dat ben ik! Ik spring in de vorm van een letter L. Twee stapjes vooruit, en dan eentje opzij. Hop! En het allerleukste: ik mag over andere stukken heen springen. Dat kan niemand anders." },
+      uitleg: "Dit is het paard, dat ben ik! Ik spring in een L, en mag over andere stukken heen." },
     { type: "q", naam: "de dame", start: "d1", path: ["d4", "a7", "a1"],
-      uitleg: "Dit is de dame. Zij is het allersterkste stuk! Zij mag rechtdoor, en ook schuin. Echt alle kanten op, zo ver als ze wil. Pas dus goed op haar." },
+      uitleg: "Dit is de dame, het sterkste stuk. Zij mag alle kanten op, recht en schuin." },
     { type: "k", naam: "de koning", start: "e4", path: ["e5", "d6", "c5"],
-      uitleg: "Dit is de koning. Hij is de baas van het spel. Maar wel een beetje langzaam: hij zet steeds maar één klein stapje. De koning is het belangrijkste stuk. Hem moet je goed beschermen." },
+      uitleg: "Dit is de koning, de baas. Hij zet maar één stapje tegelijk. Pas goed op hem!" },
     { type: "p", naam: "de pion", start: "e2", path: ["e4", "e5", "e6"],
-      uitleg: "Dit is de pion, het kleinste soldaatje. Hij stapt vooruit, eentje tegelijk. De eerste keer mag hij er twee. Maar nooit achteruit! En weet je wat knap is? Komt een pion helemaal aan de overkant, dan wordt hij een dame!" }
+      uitleg: "Dit is de pion. Hij stapt vooruit, eentje tegelijk. Aan de overkant wordt hij een dame!" }
   ];
 
-  async function teachPiece(L, def) {
+  async function teachPiece(L, def, first) {
     function place() {
       L.board.setupCustom([{ type: def.type, color: "w", square: def.start }], "w");
       L.board.setMode("move");
@@ -66,8 +66,10 @@
     L.point(def.start);
     await L.say(def.uitleg);
     L.unpoint();
-    await L.say("Tik op het stuk. De groene stipjes laten zien waar hij naartoe mag.");
-    await L.say("Verzamel nu de sterretjes! Pak ze één voor één.");
+    if (first) {
+      await L.say("Tik op het stuk. De groene stipjes laten zien waar hij naartoe mag.");
+      await L.say("Verzamel nu de sterretjes! Pak ze één voor één.");
+    }
 
     for (var i = 0; i < def.path.length; i++) {
       var target = def.path[i];
@@ -100,7 +102,7 @@
   async function modulePieces(L) {
     await L.say("We gaan de stukken leren kennen. Elk stuk loopt op zijn eigen manier. Rustig aan, eentje tegelijk.");
     for (var i = 0; i < PIECES.length; i++) {
-      await teachPiece(L, PIECES[i]);
+      await teachPiece(L, PIECES[i], i === 0);
       await L.wait(300);
     }
     L.board.clearGoals();
