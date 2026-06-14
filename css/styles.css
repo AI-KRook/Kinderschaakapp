@@ -263,6 +263,45 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 .menu-card.open-card .card-emoji { background: #d9ecff; }
 .menu-card.endgame-card { background: linear-gradient(180deg,#fff,#e7f7ee); }
 .menu-card.endgame-card .card-emoji { background: #d6f5e3; }
+
+/* =================================================================
+   LEERPAD (het menu als een kronkelend pad met haltes)
+   ================================================================= */
+.path { position: relative; padding: 20px 0 210px; }
+.path::before {
+  content: ""; position: absolute; left: 50%; top: 28px; bottom: 196px;
+  border-left: 6px dashed #ecd7ad; transform: translateX(-3px); z-index: 0;
+}
+.path-node {
+  position: relative; z-index: 1; width: 220px; margin: 9px auto;
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  transition: transform .1s ease;
+}
+.path-node:nth-child(odd)  { transform: translateX(-66px); }
+.path-node:nth-child(even) { transform: translateX(66px); }
+.path-node:nth-child(odd):active  { transform: translateX(-66px) scale(.95); }
+.path-node:nth-child(even):active { transform: translateX(66px) scale(.95); }
+.path-dot {
+  position: relative; width: 80px; height: 80px; border-radius: 50%;
+  background: var(--paper); border: 5px solid #fff;
+  box-shadow: 0 6px 0 rgba(0,0,0,.08), var(--shadow);
+  display: grid; place-items: center;
+}
+.path-emoji { font-size: 38px; line-height: 1; }
+.path-label {
+  font-weight: 800; font-size: 15px; color: var(--ink); text-align: center; line-height: 1.1;
+  background: rgba(255,255,255,.75); border-radius: 10px; padding: 3px 9px;
+}
+.path-node.done .path-dot { background: linear-gradient(180deg,#d6f5e3,#9be0bb); }
+.path-node.done .path-dot::after {
+  content: "⭐"; position: absolute; top: -8px; right: -8px; font-size: 24px;
+  filter: drop-shadow(0 2px 2px rgba(0,0,0,.2));
+}
+.path-node.current .path-dot {
+  animation: pulse 1.4s ease-in-out infinite;
+  box-shadow: 0 0 0 5px rgba(255,207,92,.65), 0 6px 0 rgba(0,0,0,.08), var(--shadow);
+}
+.path-node.current .path-label { background: var(--sun); }
 .menu-card.play-card { background: linear-gradient(180deg,#fff,#fff6e6); }
 .menu-card.play-card .card-emoji { background: #d6f5e3; }
 

@@ -108,21 +108,19 @@
   function buildMenu() {
     var grid = $("menu-grid");
     grid.innerHTML = "";
+    // de huidige halte = de eerste les die nog niet gedaan is
+    var currentIdx = Modules.list.findIndex(function (m) { return !App.progress[m.id]; });
     Modules.list.forEach(function (mod, i) {
-      var card = document.createElement("button");
-      card.type = "button";
-      card.className = "menu-card"
-        + (mod.id === "play" ? " wide play-card" : "")
-        + (mod.id === "puzzles" ? " wide puzzle-card" : "")
-        + (mod.id === "opening" ? " wide open-card" : "")
-        + (mod.id === "endgame" ? " wide endgame-card" : "");
-      if (App.progress[mod.id]) card.classList.add("done");
-      card.innerHTML =
-        '<span class="card-num">' + (i + 1) + '</span>' +
-        '<span class="card-emoji">' + mod.emoji + '</span>' +
-        '<span class="card-label">' + mod.title + '</span>';
-      card.addEventListener("click", function () { startModule(mod); });
-      grid.appendChild(card);
+      var done = !!App.progress[mod.id];
+      var node = document.createElement("button");
+      node.type = "button";
+      node.className = "path-node" + (done ? " done" : "") + (i === currentIdx ? " current" : "");
+      node.setAttribute("aria-label", mod.title + (done ? ", klaar" : ""));
+      node.innerHTML =
+        '<span class="path-dot"><span class="path-emoji">' + mod.emoji + '</span></span>' +
+        '<span class="path-label">' + mod.title + '</span>';
+      node.addEventListener("click", function () { startModule(mod); });
+      grid.appendChild(node);
     });
     updateStarCount();
   }
