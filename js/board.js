@@ -341,19 +341,23 @@
   };
 
   Board.prototype._onDown = function (e) {
-    // tikt het kind tijdens een uitleg? dan die uitleg meteen afmaken (doorgaan),
-    // en de tik niet als zet behandelen.
-    if (window.Speech && Speech.isBlocking()) { e.preventDefault(); Speech.skip(); return; }
+    // tikt het kind tijdens een uitleg? dan die uitleg meteen afmaken.
+    // De tik mag daarna gewoon een eigen stuk selecteren (dan hoef je niet
+    // twee keer te tikken), maar we maken er nooit meteen een zet mee en in
+    // tik-modus telt hij nog niet als antwoord.
+    var skipping = false;
+    if (window.Speech && Speech.isBlocking()) { e.preventDefault(); Speech.skip(); skipping = true; }
     if (this._awaitingPromo) { e.preventDefault(); return; } // wacht op promotiekeuze
     if (this.mode === "locked") return;
     var sq = this._squareFromPoint(e.clientX, e.clientY);
     if (!sq) return;
     e.preventDefault();
 
-    if (this.mode === "tap") { this._downSquare = sq; return; }
+    if (this.mode === "tap") { if (skipping) return; this._downSquare = sq; return; }
 
     // staat er een selectie en is dit een legaal doelveld? -> verzetten
-    if (this.selected && this._targets && this._targets.indexOf(sq) >= 0) {
+    // (niet meteen tijdens het overslaan van de uitleg)
+    if (!skipping && this.selected && this._targets && this._targets.indexOf(sq) >= 0) {
       this._performMove(this.selected, sq, true);
       return;
     }

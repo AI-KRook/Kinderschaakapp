@@ -874,7 +874,8 @@
       L.board.setupCustom(def.pieces, "w");
       L.board.setMode("move");
       L.board.setMovable(function (sq) { return sq === def.only; });
-      L.point(def.point);
+      L.board.showHintFrom(def.only); // het te gebruiken stuk licht op
+      L.point(def.point);             // het handje wijst het doelvakje aan
     }
     setup();
     await L.say(def.zeg, { mood: "think" });
@@ -897,15 +898,15 @@
     { only: "e4", point: "d6", target: "d6",
       pieces: [{ type: "k", color: "w", square: "h1" }, { type: "n", color: "w", square: "e4" },
                { type: "k", color: "b", square: "h8" }, { type: "r", color: "b", square: "d6" }],
-      zeg: "Slaan met het paard! Het paard springt in een L, en zo pakt hij de toren. Tik op je paard en sla de toren.",
+      zeg: "Slaan met het paard! Het paard springt in een L. Tik op je paard dat oplicht, en sla daarmee de toren.",
       gelukt: "Hebbes! Een toren gepakt met je paard. Vijf punten gewonnen!",
-      hint: "Tik op je paard en spring naar de toren die het handje aanwijst." },
+      hint: "Tik op je paard dat oplicht, en spring naar de toren die het handje aanwijst." },
     { only: "d1", point: "d6", target: "d6",
       pieces: [{ type: "k", color: "w", square: "h1" }, { type: "q", color: "w", square: "d1" },
                { type: "k", color: "b", square: "h8" }, { type: "r", color: "b", square: "d6" }],
-      zeg: "Nu met de dame. Zij is sterk en pakt ver weg. Sla de toren!",
+      zeg: "Nu met de dame. Tik op je dame, en sla daarmee de toren.",
       gelukt: "Knap! Je dame pakte de toren.",
-      hint: "Tik op je dame en pak de toren die het handje aanwijst." }
+      hint: "Tik op je dame die oplicht, en pak dan de toren die het handje aanwijst." }
   ];
 
   // pak het sterkste stuk (toren 5 boven paard 3)
@@ -918,10 +919,11 @@
       ], "w");
       L.board.setMode("move");
       L.board.setMovable(function (sq) { return sq === "d1"; });
+      L.board.showHintFrom("d1"); // je dame licht op
       L.point("h5");
     }
     setup();
-    await L.say("Je kunt twee stukken pakken. Een paard van drie punten, of een toren van vijf. Pak altijd de sterkste!", { mood: "think" });
+    await L.say("Je kunt twee stukken pakken: een paard van drie punten, of een toren van vijf. Tik op je dame en pak de sterkste, dat is de toren!", { mood: "think" });
     while (true) {
       var mv = await L.waitMove();
       if (mv.captured && mv.to === "h5") {
@@ -945,10 +947,11 @@
       ], "w");
       L.board.setMode("move");
       L.board.setMovable(function (sq) { return sq === "d1"; });
+      L.board.showHintFrom("d1"); // je dame licht op
       L.point("d5");
     }
     setup();
-    await L.say("Nu goed opletten! Pak alleen het stuk dat veilig is. De loper bij de rand wordt verdedigd door een pion. De toren staat helemaal alleen.", { mood: "think" });
+    await L.say("Nu goed opletten! De loper wordt verdedigd door een pion, maar de toren staat helemaal alleen. Tik op je dame en pak de toren die alleen staat.", { mood: "think" });
     while (true) {
       var mv = await L.waitMove();
       if (mv.captured && mv.to === "d5") {
@@ -974,6 +977,7 @@
     function enable() {
       L.board.setMode("move");
       L.board.setMovable(function (sq) { return sq === "f1"; });
+      L.board.showHintFrom("f1"); // je loper licht op
       L.point("d3");
     }
     setup();
